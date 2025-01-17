@@ -1,2 +1,2 @@
 # ai-patterns-ui
-AI Pattens with a UI, running locally or in Serverless GCP
+AI Patterns with a UI, running locally or deployed in Serverless GCP
