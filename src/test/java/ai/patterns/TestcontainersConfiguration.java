@@ -1,4 +1,4 @@
-package com.ai.patterns.examples;
+package ai.patterns;
 
 import org.springframework.boot.test.context.TestConfiguration;
 
