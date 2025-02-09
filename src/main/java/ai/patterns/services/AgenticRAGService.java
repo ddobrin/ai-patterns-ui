@@ -6,6 +6,7 @@ import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
 import ai.patterns.base.AbstractTest;
 import ai.patterns.tools.HistoryGeographyTool;
 import ai.patterns.tools.TouristBureauMCPTool;
+import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
@@ -21,14 +22,16 @@ public class AgenticRAGService extends AbstractTest {
   private Environment env;
   private HistoryGeographyTool historyGeographyTool;
   private TouristBureauMCPTool touristBureauMCPTool;
-
+  private final ChatMemoryProvider chatMemoryProvider;
 
   public AgenticRAGService(Environment env,
                            HistoryGeographyTool historyGeographyTool,
-                           TouristBureauMCPTool touristBureauMCPTool){
+                           TouristBureauMCPTool touristBureauMCPTool,
+                           ChatMemoryProvider chatMemoryProvider){
     this.env = env;
     this.historyGeographyTool = historyGeographyTool;
     this.touristBureauMCPTool = touristBureauMCPTool;
+    this.chatMemoryProvider = chatMemoryProvider;
   }
 
   public String callAgent(String chatId,
@@ -39,14 +42,10 @@ public class AgenticRAGService extends AbstractTest {
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
         .chatLanguageModel(getChatLanguageModel(chatModel))
         .tools(historyGeographyTool, touristBureauMCPTool)
-        .chatMemory(MessageWindowChatMemory.withMaxMessages(1000))
+        .chatMemoryProvider(chatMemoryProvider)
         .build();
 
     String report = assistant.chat(chatId, systemMessage, userMessage);
-        //"Write a report about the population of Berlin, its geographic situation, its historical origins, and find an article about the city in the FileSystem"
-        //  "Write a report about the population of Berlin, and find an article about the city in the filesystem"
-        // "Write a report about the population of Berlin, its geographic situation, its historical origins, and get a printable article about the city"
-        // "Write a report about the cultural aspects of Berlin"
 
     System.out.println(magenta("\n>>> FINAL RESPONSE REPORT:\n"));
     System.out.println(cyan(report));
@@ -56,7 +55,7 @@ public class AgenticRAGService extends AbstractTest {
 
   interface AgenticAssistant {
     @SystemMessage("""
-            You are a knowledgeable history and geography assistant.
+            You are a knowledgeable history, geography and tourist assistant.
             Your role is to write reports about a particular location or event,
             focusing on the key topics asked by the user.
             

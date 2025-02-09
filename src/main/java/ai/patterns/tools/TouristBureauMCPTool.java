@@ -52,7 +52,7 @@ public class TouristBureauMCPTool extends AbstractTest{
         .command(List.of("npx",
             "-y",
             "@modelcontextprotocol/server-filesystem",
-            new File("src/test/resources/capitals").getAbsolutePath()
+            new File("src/resources/capitals").getAbsolutePath()
         ))
         .logEvents(true)
         .build();
@@ -67,9 +67,9 @@ public class TouristBureauMCPTool extends AbstractTest{
       System.out.println(yellow("- Tool: ") + tool.name());
       System.out.println(cyan("  Description: ") + tool.description());
       System.out.println(cyan("  Parameters: "));
-      tool.parameters().properties().entrySet().forEach(param -> {
-        System.out.println(yellow("    - ") + param.getKey() + ": " + param.getValue());
-      });
+      tool.parameters().properties()
+          .forEach((key, value) -> System.out.println(yellow("    - ") + key + ": " + value));
+
       System.out.println();
     });
 
