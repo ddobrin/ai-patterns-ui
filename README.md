@@ -1,7 +1,77 @@
 # ai-patterns-ui
+**Anything in this repo is open to be changed, it is a shared working repo**
+
 AI Patterns w/UI front-end, running locally or deployed in Serverless GCP
 
-## Anything in this repo is open to be changed, it is a shared working repo
+### Last updated: Sunday, Feb 09
+3 sections:
+* Starter app, added  Feb 09
+* outline  from Guillaume - needs more explanations
+* original content
+
+## Starter app
+* Spring Boot app, with Vaadin support, Java 21, LC4J 1.0.0-beta1, Boot 3.4.2
+* starts with 2 endpoints, /chat and /call-agent 
+* has 2 RestControllers (for testing now) and also 2 Vaadin Endpoints (to be wired into the UI), both leveraging @Services
+* has actuator classes set up, for future deployment
+* HistoryGeographyTool and TouristBureauMCPTool kept seld contained and just wired in as @Components
+
+Env. variables: uses AstraDB, I will paste a key in the Git repo, under /Discussions - it is a private repo and the Astra account is free
+```shell
+export GCP_PROJECT_ID=<project>>
+export GCP_LOCATION=us-central1 
+export ASTRA_TOKEN=AstraCS:...
+```
+
+Models:
+```shell
+gemini-2.0-flash-001
+gemini-2.0-flash-thinking-exp-01-21
+gemini-2.0-pro-exp-02-05
+```
+Commands:
+```shell
+# basic chat
+# the system message is set, and this setting just appends to it - for initial testing
+curl -X POST   http://localhost:8080/chat   -H 'Content-Type: application/json'   -d '{
+    "chatId": "user123",
+    "systemMessage": "Return the response to the user",
+    "userMessage": "Write a report about the population of Berlin, its geographic situation, its historical origins",
+    "useVertex": "true",
+    "chatModel": "gemini-2.0-flash-001"
+  }'
+  
+# uses function calling, step-by-step
+curl -X POST   http://localhost:8080/call-agent   -H 'Content-Type: application/json'   -d '{
+    "chatId": "user123",
+    "systemMessage": "Return the response to the user",
+    "userMessage": "Write a report about the population of Berlin, its geographic situation, its historical origins",
+    "useVertex": "true",
+    "chatModel": "gemini-2.0-flash-001"
+  }'  
+  
+# uses function calling, step-by-step, and also triggers a second function which uses MCP with a FileSystem
+curl -X POST   http://localhost:8080/call-agent   -H 'Content-Type: application/json'   -d '{
+    "chatId": "user123",
+    "systemMessage": "Return the response to the user",
+    "userMessage": "Write a report about the population of Berlin, its geographic situation, its historical origins, and find an article about the city in the FileSystem",
+    "useVertex": "true",
+    "chatModel": "gemini-2.0-flash-001"
+  }'  
+```
+
+
+## Outline from Guillaume
+Needs more explanations
+
+* similar to the original in terms of choices for embedding, choice of models, etc
+* adds a chat like interface
+* similar interface with Vaadin ni Marcus' repo [here](https://github.com/marcushellberg/java-ai-playground) 
+
+
+![Mockup](world_capitals.png)
+
+## Original content
 
 #### Why this doc?
 Developers are looking for guidance on implementing AI patterns in their enterprise applications.
