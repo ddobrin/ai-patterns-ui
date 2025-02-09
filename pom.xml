@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ai.patterns</groupId>
-	<artifactId>examples</artifactId>
+	<artifactId>playground</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>examples</name>
-	<description>Samples for Spring Boot w/Langchain4J and /LLMs</description>
+	<name>playground</name>
+	<description>Sample playground for AI Patterns w/Langchain4J and /LLMs</description>
 
 	<properties>
 		<java.version>21</java.version>
@@ -50,19 +50,6 @@
 			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- logging -->
-<!--		<dependency>-->
-<!--			<groupId>org.slf4j</groupId>-->
-<!--			<artifactId>slf4j-api</artifactId>-->
-<!--			<version>${slf4j.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>ch.qos.logback</groupId>-->
-<!--			<artifactId>logback-classic</artifactId>-->
-<!--			<version>${logback.version}</version>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
 
 		<!-- Marshalling -->
 		<dependency>

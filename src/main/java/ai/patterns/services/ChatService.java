@@ -4,8 +4,6 @@ import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
 import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
 
 import ai.patterns.base.AbstractBase;
-import ai.patterns.tools.HistoryGeographyTool;
-import ai.patterns.tools.TouristBureauMCPTool;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
@@ -16,31 +14,23 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AgenticRAGService extends AbstractBase {
+public class ChatService extends AbstractBase {
   // with multiple models, AI framework starters are not yet configured for supporting multiple models
   private Environment env;
-  private HistoryGeographyTool historyGeographyTool;
-  private TouristBureauMCPTool touristBureauMCPTool;
   private final ChatMemoryProvider chatMemoryProvider;
 
-  public AgenticRAGService(Environment env,
-                           HistoryGeographyTool historyGeographyTool,
-                           TouristBureauMCPTool touristBureauMCPTool,
-                           ChatMemoryProvider chatMemoryProvider){
+  public ChatService(Environment env, ChatMemoryProvider chatMemoryProvider){
     this.env = env;
-    this.historyGeographyTool = historyGeographyTool;
-    this.touristBureauMCPTool = touristBureauMCPTool;
     this.chatMemoryProvider = chatMemoryProvider;
   }
 
-  public String callAgent(String chatId,
-                          String systemMessage,
-                          String userMessage,
-                          boolean useVertex,
-                          String chatModel) {
-    AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
+  public String chat(String chatId,
+                    String systemMessage,
+                    String userMessage,
+                    boolean useVertex,
+                    String chatModel) {
+    ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
         .chatLanguageModel(getChatLanguageModel(chatModel))
-        .tools(historyGeographyTool, touristBureauMCPTool)
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 
@@ -52,17 +42,12 @@ public class AgenticRAGService extends AbstractBase {
     return report;
   }
 
-  interface AgenticAssistant {
+  interface ChatAssistant {
     @SystemMessage("""
             You are a knowledgeable history, geography and tourist assistant.
             Your role is to write reports about a particular location or event,
             focusing on the key topics asked by the user.
             
-            Think step by step:
-            1) Identify the key topics the user is interested
-            2) For each topic, devise a list of questions corresponding to those topics
-            3) Search those questions in the database
-            4) Collect all those answers together, and create the final report.
             {{systemMessage}}
             """)
     String chat(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);

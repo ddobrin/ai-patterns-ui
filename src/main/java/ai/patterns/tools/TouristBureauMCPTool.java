@@ -4,8 +4,8 @@ import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
 import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
 import static com.datastax.astra.internal.utils.AnsiUtils.yellow;
 
-import ai.patterns.base.AbstractTest;
-import ai.patterns.base.TopicReport;
+import ai.patterns.base.AbstractBase;
+import ai.patterns.data.TopicReport;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.mcp.McpToolProvider;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
@@ -20,7 +20,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TouristBureauMCPTool extends AbstractTest{
+public class TouristBureauMCPTool extends AbstractBase {
 
   interface TopicMCPAssistant {
     @SystemMessage("""

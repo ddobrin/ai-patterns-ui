@@ -40,7 +40,7 @@ import java.util.Objects;
 /**
  * Abstract Class for different tests and use cases to share configuration
  */
-public abstract class AbstractTest {
+public abstract class AbstractBase {
 
     // ------------------------------------------------------------
     //                           GEMINI STUFF
@@ -107,7 +107,7 @@ public abstract class AbstractTest {
         // verbose
         //return new DataAPIClient(ASTRA_TOKEN).getDatabase(ASTRA_API_ENDPOINT);
         return new DataAPIClient(ASTRA_TOKEN)
-                //DataAPIOptions.builder().withObserver(new LoggingCommandObserver(AbstractTest.class)).build())
+                //DataAPIOptions.builder().withObserver(new LoggingCommandObserver(AbstractBase.class)).build())
                 .getDatabase(ASTRA_API_ENDPOINT);
     }
 
@@ -124,7 +124,7 @@ public abstract class AbstractTest {
     // ------------------------------------------------------------
 
     protected void ingestDocument(String docName, EmbeddingModel model, EmbeddingStore<TextSegment> store) {
-        Path path = new File(Objects.requireNonNull(AbstractTest.class
+        Path path = new File(Objects.requireNonNull(AbstractBase.class
                 .getResource("/" + docName)).getFile()).toPath();
         dev.langchain4j.data.document.Document document = FileSystemDocumentLoader
                 .loadDocument(path, new TextDocumentParser());

@@ -4,8 +4,8 @@ import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
 import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
 import static com.datastax.astra.internal.utils.AnsiUtils.yellow;
 
-import ai.patterns.base.AbstractTest;
-import ai.patterns.base.TopicReport;
+import ai.patterns.base.AbstractBase;
+import ai.patterns.data.TopicReport;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
@@ -16,7 +16,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HistoryGeographyTool extends AbstractTest {
+public class HistoryGeographyTool extends AbstractBase {
 
   private EmbeddingStore<TextSegment> embeddingStore;
 

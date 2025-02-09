@@ -14,7 +14,6 @@ public class AgenticRAGEndpoint {
     this.agenticRAGService = agenticRAGService;
   }
 
-  @PostMapping("/call-agent")
   public String  callAgent(String chatId,
       String systemMessage,
       String userMessage,
