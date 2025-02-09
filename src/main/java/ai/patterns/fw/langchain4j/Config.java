@@ -8,6 +8,9 @@ import com.datastax.astra.client.Database;
 import com.datastax.astra.client.model.SimilarityMetric;
 import com.datastax.astra.langchain4j.store.embedding.AstraDbEmbeddingStore;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import dev.langchain4j.memory.chat.TokenWindowChatMemory;
+import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +27,7 @@ public class Config extends AbstractTest {
   @Bean
   public EmbeddingStore<TextSegment> embeddingStore() {
     if (collectionExists()) {
-      System.out.println(cyan("Collection already exists."));
+      System.out.println(cyan("Collection exists in the database)" + COLLECTION_NAME));
       return new AstraDbEmbeddingStore(DATABASE.getCollection(COLLECTION_NAME));
     } else {
       System.out.println(cyan("Creating collection..."));

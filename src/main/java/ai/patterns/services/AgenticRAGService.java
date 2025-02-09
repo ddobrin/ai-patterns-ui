@@ -7,7 +7,11 @@ import ai.patterns.base.AbstractTest;
 import ai.patterns.tools.HistoryGeographyTool;
 import ai.patterns.tools.TouristBureauMCPTool;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -28,21 +32,21 @@ public class AgenticRAGService extends AbstractTest {
   }
 
   public String callAgent(String chatId,
-                        String systemMessage,
-                        String userMessage,
-                        boolean useVertex,
-                        String chatModel) {
+                          String systemMessage,
+                          String userMessage,
+                          boolean useVertex,
+                          String chatModel) {
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(MODEL_GEMINI_FLASH))
+        .chatLanguageModel(getChatLanguageModel(chatModel))
         .tools(historyGeographyTool, touristBureauMCPTool)
+        .chatMemory(MessageWindowChatMemory.withMaxMessages(1000))
         .build();
 
-    String report = assistant.chat(
-        "Write a report about the population of Berlin, its geographic situation, its historical origins, and find an article about the city in the FileSystem"
+    String report = assistant.chat(chatId, systemMessage, userMessage);
+        //"Write a report about the population of Berlin, its geographic situation, its historical origins, and find an article about the city in the FileSystem"
         //  "Write a report about the population of Berlin, and find an article about the city in the filesystem"
         // "Write a report about the population of Berlin, its geographic situation, its historical origins, and get a printable article about the city"
         // "Write a report about the cultural aspects of Berlin"
-    );
 
     System.out.println(magenta("\n>>> FINAL RESPONSE REPORT:\n"));
     System.out.println(cyan(report));
@@ -61,7 +65,8 @@ public class AgenticRAGService extends AbstractTest {
             2) For each topic, devise a list of questions corresponding to those topics
             3) Search those questions in the database
             4) Collect all those answers together, and create the final report.
+            {{systemMessage}}
             """)
-    String chat(String userMessage);
+    String chat(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
   }
 }
