@@ -2,14 +2,14 @@
 @import url('@vaadin/react-components/css/lumo/Typography.css');
 @import url('@vaadin/react-components/css/lumo/Utility.module.css');
 
-.container {
+.ai-patterns-ui {
     display: flex;
     flex-direction: column;
     height: 100%;
 
     header {
-        background: var(--lumo-contrast-10pct);
         padding: var(--lumo-space-m);
+        border-bottom: 1px solid var(--lumo-contrast-20pct);
     }
 
     main {

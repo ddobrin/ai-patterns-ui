@@ -1,6 +1,6 @@
-import {Chat} from "../components/Chat";
 import {nanoid} from "nanoid";
 import {useEffect, useState} from "react";
+import { Chat } from '@vaadin/flow-frontend/chat/Chat.js';
 import {ChatEndpoint} from "Frontend/generated/endpoints";
 import ChatOptions from "Frontend/generated/ai/patterns/web/endpoints/ChatEndpoint/ChatOptions";
 
@@ -31,7 +31,7 @@ export default function AiPatterns() {
   }, []);
 
   return (
-    <div className="container">
+    <div className="ai-patterns-ui">
       <header>
         <h1>World Capitals</h1>
       </header>
