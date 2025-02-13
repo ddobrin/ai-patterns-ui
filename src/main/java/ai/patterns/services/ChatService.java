@@ -12,6 +12,7 @@ import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 @Service
 public class ChatService extends AbstractBase {
@@ -42,14 +43,31 @@ public class ChatService extends AbstractBase {
     return report;
   }
 
-  interface ChatAssistant {
-    @SystemMessage("""
+  public Flux<String> stream(String chatId,
+                             String systemMessage,
+                             String userMessage,
+                             boolean useVertex,
+                             String chatModel) {
+    ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
+        .streamingChatLanguageModel(getChatLanguageModelStreaming(chatModel))
+        .chatMemoryProvider(chatMemoryProvider)
+        .build();
+
+    return assistant.stream(chatId, systemMessage, userMessage);
+  }
+
+  private static final String SYSTEM_MESSAGE = """
             You are a knowledgeable history, geography and tourist assistant.
             Your role is to write reports about a particular location or event,
             focusing on the key topics asked by the user.
             
             {{systemMessage}}
-            """)
+            """;
+  interface ChatAssistant {
+    @SystemMessage(SYSTEM_MESSAGE)
     String chat(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
+
+    @SystemMessage(SYSTEM_MESSAGE)
+    Flux<String> stream(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
   }
 }

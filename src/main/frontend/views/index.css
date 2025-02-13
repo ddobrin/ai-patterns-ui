@@ -1,0 +1,32 @@
+@import url('@vaadin/react-components/css/Lumo.css');
+@import url('@vaadin/react-components/css/lumo/Typography.css');
+@import url('@vaadin/react-components/css/lumo/Utility.module.css');
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    header {
+        background: var(--lumo-contrast-10pct);
+        padding: var(--lumo-space-m);
+    }
+
+    main {
+        flex-grow: 1;
+        display: flex;
+
+        .settings {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--lumo-space-s);
+            padding: var(--lumo-space-m);
+            border-right: 1px solid var(--lumo-contrast-20pct);
+        }
+
+        .vaadin-chat-component {
+            flex-grow: 1;
+        }
+    }
+}
