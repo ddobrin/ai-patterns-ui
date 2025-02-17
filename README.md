@@ -27,6 +27,21 @@ export GCP_LOCATION=us-central1
 export ASTRA_TOKEN=AstraCS:...
 ```
 
+Deploy to Cloud Run
+```shell
+./mvnw spring-boot:build-image -DskipTests -Pproduction -Dspring-boot.build-image.imageName=agentic-rag
+
+docker tag agentic-rag us-central1-docker.pkg.dev/genai-playground24/agentic-rag/agentic-rag:latest
+
+docker push us-central1-docker.pkg.dev/genai-playground24/agentic-rag/agentic-rag:latest
+
+gcloud run deploy agentic-rag --image us-central1-docker.pkg.dev/genai-playground24/agentic-rag/agentic-rag:latest  --region us-central1 --set-env-vars=SERVER_PORT=8080    --memory 2Gi --cpu 2 --cpu-boost --execution-environment=gen1 --set-env-vars=GCP_PROJECT_ID=genai-playground24 --set-env-vars=GCP_LOCATION=us-central1 
+ --set-env-vars=ASTRA_TOKEN=<your secret>
+ 
+# Note: replace the ASTRA_DB token with your own value, configure it as a secret
+gcloud run deploy agentic-rag --image us-central1-docker.pkg.dev/genai-playground24/agentic-rag/agentic-rag:latest  --region us-central1 --set-env-vars=SERVER_PORT=8080    --memory 2Gi --cpu 2 --cpu-boost --execution-environment=gen1 --set-env-vars=GCP_PROJECT_ID=genai-playground24 --set-env-vars=GCP_LOCATION=us-central1 
+ --set-env-vars=ASTRA_TOKEN=sm://genai-playground24/ASTRA_TOKEN/latest
+```
 
 # -------------
 3 sections:
