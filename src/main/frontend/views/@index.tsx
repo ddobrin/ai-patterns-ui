@@ -22,7 +22,7 @@ const defaultOptions: ChatOptions = {
 };
 
 export default function AiPatterns() {
-  const [chatId, setChatId] = useState(nanoid());
+  const [chatId] = useState(nanoid());
 
   const {field, model, read, value} = useForm(ChatOptionsModel);
 
@@ -41,6 +41,9 @@ export default function AiPatterns() {
           <TextArea label="System prompt" {...field(model.systemMessage)} />
           <ComboBox label="Model" {...field(model.model)} items={models} />
           <Checkbox label="Use Vertex" {...field(model.useVertex)} />
+
+          <div className="space"></div>
+          <div className="built-with">UI built with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         </div>
         <Chat chatId={chatId} service={ChatEndpoint} options={value}/>
       </main>
