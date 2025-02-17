@@ -16,7 +16,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<vaadin.version>24.6.2</vaadin.version>
+		<vaadin.version>24.7.0.alpha8</vaadin.version>
 		<slf4j.version>2.0.16</slf4j.version>
 		<logback.version>1.5.15</logback.version>
 		<jackson.version>2.18.2</jackson.version>
@@ -34,14 +34,24 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-spring-boot-starter</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+		<!-- Vaadin -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-spring-boot-starter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.vaadin</groupId>
+			<artifactId>experimental-components</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+
 
 		<!-- BoilerPlate -->
 		<dependency>
@@ -79,6 +89,11 @@
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-mcp</artifactId>
+			<version>1.0.0-beta1</version>
+		</dependency>
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-reactor</artifactId>
 			<version>1.0.0-beta1</version>
 		</dependency>
 
@@ -208,6 +223,24 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<id>vaadin-prereleases</id>
+			<url>https://maven.vaadin.com/vaadin-prereleases</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<!-- Repository needed for prerelease versions of Vaadin -->
+		<pluginRepository>
+			<id>Vaadin prereleases</id>
+			<url>https://maven.vaadin.com/vaadin-prereleases</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

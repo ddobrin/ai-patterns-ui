@@ -1,0 +1,54 @@
+@import url('@vaadin/react-components/css/Lumo.css');
+@import url('@vaadin/react-components/css/lumo/Typography.css');
+@import url('@vaadin/react-components/css/lumo/Utility.module.css');
+
+.ai-patterns-ui {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+
+    header {
+        padding: var(--lumo-space-m);
+        border-bottom: 1px solid var(--lumo-contrast-20pct);
+        flex-shrink: 0;
+    }
+
+    main {
+        flex-grow: 1;
+        display: flex;
+        min-height: 0;
+        overflow: hidden;
+
+        .settings {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--lumo-space-s);
+            padding: var(--lumo-space-m);
+            border-right: 1px solid var(--lumo-contrast-20pct);
+            flex-shrink: 0;
+            overflow-y: auto;
+
+            .space {
+                flex-grow: 1;
+            }
+
+            .built-with {
+                font-size: var(--lumo-font-size-s);
+
+                a {
+                    color: var(--lumo-body-text-color);
+                    text-decoration: none;
+                }
+            }
+        }
+
+        .vaadin-chat-component {
+            flex: 1;
+            min-height: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+    }
+}
