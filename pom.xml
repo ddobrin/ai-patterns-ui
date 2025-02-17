@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ai.patterns</groupId>
 	<artifactId>playground</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>playground</name>
 	<description>Sample playground for AI Patterns w/Langchain4J and /LLMs</description>
 

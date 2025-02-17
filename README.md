@@ -3,7 +3,32 @@
 
 AI Patterns w/UI front-end, running locally or deployed in Serverless GCP
 
-### Last updated: Sunday, Feb 09
+### Last updated: Monday, Feb 17
+1. Running UI from Marcus - public String thankYou(true);
+2. Adding a few new fields to gauge feedback on UI evolution
+3. Current commit supports a streaming chat, more to come ...
+
+```shell
+# start from debugger
+AIPatternsWebApplication
+
+# build from CLI and start in dev mode, changes in UI code automatically reflected
+./mvnw spring-boot:run
+
+# build runnable JAR
+./mvnw clean package -Pproduction
+ 
+ java -jar target/playground-0.0.1.jar
+```
+Env. variables: uses AstraDB, I will paste a key in the Git repo, under /Discussions - it is a private repo and the Astra account is free
+```shell
+export GCP_PROJECT_ID=<project>>
+export GCP_LOCATION=us-central1 
+export ASTRA_TOKEN=AstraCS:...
+```
+
+
+# -------------
 3 sections:
 * Starter app, added  Feb 09
 * outline  from Guillaume - needs more explanations

@@ -36,10 +36,14 @@
 
             .built-with {
                 font-size: var(--lumo-font-size-s);
+                font-weight: bold;
+                /*color: blue;*/
 
                 a {
                     color: var(--lumo-body-text-color);
                     text-decoration: none;
+                    font-weight: bold;
+                    color: blue;
                 }
             }
         }

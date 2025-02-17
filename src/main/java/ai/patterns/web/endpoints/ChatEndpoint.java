@@ -17,7 +17,11 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
     public record ChatOptions(
         String systemMessage,
         boolean useVertex,
-        String model
+        boolean useAgents,
+        String model,
+        boolean useGuardrails,
+        boolean evaluateResponse,
+        boolean useTools
     ) {
     }
 
@@ -30,7 +34,7 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
     @Override
     public Flux<String> stream(String chatId, String userMessage, @Nullable ChatOptions options) {
         if (options == null) {
-            options = new ChatOptions("", false, "gemini-2.0-flash-001");
+            options = new ChatOptions("", true, false, "gemini-2.0-flash-001", true, false, false);
         }
         return chatService.stream(
             chatId,
