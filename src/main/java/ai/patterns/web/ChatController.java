@@ -2,6 +2,7 @@ package ai.patterns.web;
 
 import ai.patterns.actuator.StartupCheck;
 import ai.patterns.services.ChatService;
+import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -25,7 +26,8 @@ public class ChatController {
     boolean useVertex = Boolean.parseBoolean((String)body.get("useVertex"));
     String chatModel = (String) body.get("chatModel");
 
-    return chatService.chat(chatId, systemMessage, userMessage, useVertex, chatModel);
+    ChatOptions options = new ChatOptions("", true, false, "gemini-2.0-flash-001", true, false, false);
+    return chatService.chat(chatId, systemMessage, userMessage, options);
   }
 
   @PostConstruct

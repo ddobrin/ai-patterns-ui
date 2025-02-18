@@ -4,6 +4,7 @@ import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
 import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
 
 import ai.patterns.base.AbstractBase;
+import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
@@ -20,7 +21,8 @@ public class ChatService extends AbstractBase {
   private Environment env;
   private final ChatMemoryProvider chatMemoryProvider;
 
-  public ChatService(Environment env, ChatMemoryProvider chatMemoryProvider){
+  public ChatService(Environment env,
+                     ChatMemoryProvider chatMemoryProvider) {
     this.env = env;
     this.chatMemoryProvider = chatMemoryProvider;
   }
@@ -28,10 +30,9 @@ public class ChatService extends AbstractBase {
   public String chat(String chatId,
                     String systemMessage,
                     String userMessage,
-                    boolean useVertex,
-                    String chatModel) {
+                    ChatOptions options) {
     ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(chatModel))
+        .chatLanguageModel(getChatLanguageModel(options.model()))
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 
@@ -46,15 +47,14 @@ public class ChatService extends AbstractBase {
   public Flux<String> stream(String chatId,
                              String systemMessage,
                              String userMessage,
-                             boolean useVertex,
-                             String chatModel) {
+                             ChatOptions options) {
     ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
-        .streamingChatLanguageModel(getChatLanguageModelStreaming(chatModel))
+        .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 
-    return assistant.stream(chatId, systemMessage, userMessage);
-  }
+        return assistant.stream(chatId, systemMessage, userMessage);
+    }
 
   private static final String SYSTEM_MESSAGE = """
             You are a knowledgeable history, geography and tourist assistant.

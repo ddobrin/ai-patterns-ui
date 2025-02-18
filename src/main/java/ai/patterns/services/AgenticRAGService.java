@@ -6,6 +6,7 @@ import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.tools.HistoryGeographyTool;
 import ai.patterns.tools.TouristBureauMCPTool;
+import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
@@ -14,6 +15,7 @@ import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 @Service
 public class AgenticRAGService extends AbstractBase {
@@ -36,10 +38,9 @@ public class AgenticRAGService extends AbstractBase {
   public String callAgent(String chatId,
                           String systemMessage,
                           String userMessage,
-                          boolean useVertex,
-                          String chatModel) {
+                          ChatOptions options) {
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(chatModel))
+        .chatLanguageModel(getChatLanguageModel(options.model()))
         .tools(historyGeographyTool, touristBureauMCPTool)
         .chatMemoryProvider(chatMemoryProvider)
         .build();
@@ -51,9 +52,20 @@ public class AgenticRAGService extends AbstractBase {
 
     return report;
   }
+  public Flux<String> stream(String chatId,
+                        String systemMessage,
+                        String userMessage,
+                        ChatOptions options) {
+    AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
+        .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
+        .tools(historyGeographyTool, touristBureauMCPTool)
+        .chatMemoryProvider(chatMemoryProvider)
+        .build();
 
-  interface AgenticAssistant {
-    @SystemMessage("""
+    return assistant.stream(chatId, systemMessage, userMessage);
+  }
+
+  private static final String SYSTEM_MESSAGE = """
             You are a knowledgeable history, geography and tourist assistant.
             Your role is to write reports about a particular location or event,
             focusing on the key topics asked by the user.
@@ -64,7 +76,14 @@ public class AgenticRAGService extends AbstractBase {
             3) Search those questions in the database
             4) Collect all those answers together, and create the final report.
             {{systemMessage}}
-            """)
-    String chat(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
+            """;
+
+  interface AgenticAssistant {
+        @SystemMessage(SYSTEM_MESSAGE)
+        String chat(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
+
+        @SystemMessage(SYSTEM_MESSAGE)
+        Flux<String> stream(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
+
   }
 }

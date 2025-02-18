@@ -1,6 +1,7 @@
 package ai.patterns.web.endpoints;
 
 import ai.patterns.services.AgenticRAGService;
+import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +18,7 @@ public class AgenticRAGEndpoint {
   public String  callAgent(String chatId,
       String systemMessage,
       String userMessage,
-      boolean useVertex,
-      String chatModel){
-    return agenticRAGService.callAgent(chatId, systemMessage, userMessage, useVertex, chatModel);
+      ChatOptions options){
+    return agenticRAGService.callAgent(chatId, systemMessage, userMessage, options);
   }
 }

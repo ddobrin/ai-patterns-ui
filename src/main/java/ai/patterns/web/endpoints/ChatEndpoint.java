@@ -1,5 +1,6 @@
 package ai.patterns.web.endpoints;
 
+import ai.patterns.services.AgenticRAGService;
 import ai.patterns.services.ChatService;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
@@ -26,9 +27,11 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
     }
 
     private final ChatService chatService;
+    private final AgenticRAGService agenticRAGService;
 
-    public ChatEndpoint(ChatService chatService) {
+    public ChatEndpoint(ChatService chatService, AgenticRAGService agenticRAGService) {
         this.chatService = chatService;
+        this.agenticRAGService = agenticRAGService;
     }
 
     @Override
@@ -36,13 +39,21 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         if (options == null) {
             options = new ChatOptions("", true, false, "gemini-2.0-flash-001", true, false, false);
         }
-        return chatService.stream(
-            chatId,
-            options.systemMessage(),
-            userMessage,
-            options.useVertex(),
-            options.model()
-        );
+
+        if (options.useAgents()) {
+            return agenticRAGService.stream(
+                chatId,
+                options.systemMessage(),
+                userMessage,
+                options);
+        } else {
+            return chatService.stream(
+                chatId,
+                options.systemMessage(),
+                userMessage,
+                options
+            );
+        }
     }
 
     // This demo does not use attachments or recalling message history
