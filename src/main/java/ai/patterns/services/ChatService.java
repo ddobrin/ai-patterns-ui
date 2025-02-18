@@ -63,6 +63,8 @@ public class ChatService extends AbstractBase {
             You are a knowledgeable history, geography and tourist assistant.
             Your role is to write reports about a particular location or event,
             focusing on the key topics asked by the user.
+      
+            Let us focus on world capitals today
             
             {{systemMessage}}
             """;

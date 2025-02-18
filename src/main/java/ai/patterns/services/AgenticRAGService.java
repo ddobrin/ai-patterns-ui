@@ -70,16 +70,26 @@ public class AgenticRAGService extends AbstractBase {
 
   }
 
+  // private static final String SYSTEM_MESSAGE = """
+  //           You are a knowledgeable history, geography and tourist assistant.
+  //           Your role is to write reports about a particular location or event,
+  //           focusing on the key topics asked by the user.
+  //
+  //           Think step by step:
+  //           1) Identify the key topics the user is interested
+  //           2) For each topic, devise a list of questions corresponding to those topics
+  //           3) Search those questions in the database
+  //           4) Collect all those answers together, and create the final report.
+  //           {{systemMessage}}
+  //           """;
+
   private static final String SYSTEM_MESSAGE = """
             You are a knowledgeable history, geography and tourist assistant.
             Your role is to write reports about a particular location or event,
             focusing on the key topics asked by the user.
             
-            Think step by step:
-            1) Identify the key topics the user is interested
-            2) For each topic, devise a list of questions corresponding to those topics
-            3) Search those questions in the database
-            4) Collect all those answers together, and create the final report.
+            Let us focus on world capitals today.
+            
             {{systemMessage}}
             """;
 
