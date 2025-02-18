@@ -52,8 +52,11 @@ public class ChatService extends AbstractBase {
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
         .chatMemoryProvider(chatMemoryProvider)
         .build();
-
-        return assistant.stream(chatId, systemMessage, userMessage);
+        return assistant.stream(chatId, systemMessage, userMessage)
+            .doOnNext(System.out::print)
+            .doOnComplete(() -> {
+              System.out.println(magenta("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
+            });
     }
 
   private static final String SYSTEM_MESSAGE = """
