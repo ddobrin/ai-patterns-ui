@@ -3,7 +3,12 @@
 
 AI Patterns w/UI front-end, running locally or deployed in Serverless GCP
 
-### Last updated: Monday, Feb 17
+### Last updated: Monday, Feb 20
+Added Xiang to the repo - we'll collaborate on observability from the app.
+
+---
+
+### Updated Feb 17
 1. Running UI from Marcus - public String thankYou(true);
 2. Adding a few new fields to gauge feedback on UI evolution
 3. Current commit supports a streaming chat, more to come ...
