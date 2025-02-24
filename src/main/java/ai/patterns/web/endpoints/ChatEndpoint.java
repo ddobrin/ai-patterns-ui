@@ -15,15 +15,35 @@ import java.util.List;
 @AnonymousAllowed
 public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
 
+    public enum ChunkingType {
+        NONE,
+        HIERARCHICAL,
+        HYPOTHETICAL,
+        CONTEXTUAL,
+        LATE
+    }
+
+    public enum RetrievalType {
+        NONE,
+        FILTERING,
+        QUERY_COMPRESSION,
+        QUERY_ROUTING,
+        HYDE,
+        RERANKING,
+    }
+
     public record ChatOptions(
         String systemMessage,
         boolean useVertex,
         boolean useAgents,
+        boolean useWebsearch,
         String model,
+        boolean enableSafety,
         boolean useGuardrails,
         boolean evaluateResponse,
-        boolean useTools
-    ) {
+        boolean useTools,
+        ChunkingType chunkingType,
+        RetrievalType retrievalType) {
     }
 
     private final ChatService chatService;
@@ -37,7 +57,17 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
     @Override
     public Flux<String> stream(String chatId, String userMessage, @Nullable ChatOptions options) {
         if (options == null) {
-            options = new ChatOptions("", true, false, "gemini-2.0-flash-001", true, false, false);
+            options = new ChatOptions("",
+                true,
+                false,
+                false,
+                "gemini-2.0-flash-001",
+                true,
+                true,
+                false,
+                false,
+                ChunkingType.NONE,
+                RetrievalType.NONE);
         }
 
         if (options.useAgents()) {

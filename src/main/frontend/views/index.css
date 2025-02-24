@@ -21,14 +21,20 @@
         overflow: hidden;
 
         .settings {
-            width: 400px;
+            width: 450px;
             display: flex;
             flex-direction: column;
             gap: var(--lumo-space-s);
             padding: var(--lumo-space-m);
             border-right: 1px solid var(--lumo-contrast-20pct);
-            flex-shrink: 0;
+            flex-shrink: 1;
             overflow-y: auto;
+
+            .side-by-side-checkboxes {
+                display: flex; /* Make the container a flexbox */
+                gap: var(--lumo-space-m); /* Add some space between the checkboxes */
+                align-items: center; /* Align the checkboxes vertically */
+            }
 
             .space {
                 flex-grow: 1;
