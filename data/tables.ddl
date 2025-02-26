@@ -35,9 +35,35 @@ CREATE TABLE capital_continents (
 CREATE INDEX idx_capitals_id ON capitals (capital_id);
 
 --
-INSERT INTO continents (continent_name) VALUES ('Europe');
-INSERT INTO continents (continent_name) VALUES ('Asia');
-INSERT INTO continents (continent_name) VALUES ('North America');
+-- Insert into the continents table (if it doesn't already exist)
+INSERT INTO continents (continent_name)
+SELECT 'Europe'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Europe');
+
+INSERT INTO continents (continent_name)
+SELECT 'Asia'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Asia');
+
+INSERT INTO continents (continent_name)
+SELECT 'Africa'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Africa');
+
+INSERT INTO continents (continent_name)
+SELECT 'Antarctica'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Antarctica');
+
+INSERT INTO continents (continent_name)
+SELECT 'Australia'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Australia');
+
+INSERT INTO continents (continent_name)
+SELECT 'North America'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'North America');
+
+INSERT INTO continents (continent_name)
+SELECT 'South America'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'South America');
+
 -- ...
 
 INSERT INTO capitals (capital, country, content, chunk)
@@ -57,4 +83,39 @@ INSERT INTO capital_continents (capital_id, continent_id)
 VALUES ((SELECT capital_id FROM capitals WHERE capital = 'Paris'), (SELECT continent_id FROM continents WHERE continent_name = 'Europe'));
 
 
+-- SELECT data
+SELECT
+    c.capital_id,
+    c.capital,
+    c.country,
+    c.embed,
+    c.content,
+    c.chunk,
+    c.embedding,
+    cont.continent_name
+FROM
+    capitals AS c
+        JOIN
+    capital_continents AS cc ON c.capital_id = cc.capital_id
+        JOIN
+    continents AS cont ON cc.continent_id = cont.continent_id
+WHERE
+    c.capital = 'Ankara';
 
+SELECT
+    c.capital_id,
+    c.capital,
+    c.country,
+    c.embed,
+    c.content,
+    c.chunk,
+    c.embedding,
+    cont.continent_name
+FROM
+    capitals AS c
+        JOIN
+    capital_continents AS cc ON c.capital_id = cc.capital_id
+        JOIN
+    continents AS cont ON cc.continent_id = cont.continent_id
+WHERE
+    c.capital = 'Paris';
