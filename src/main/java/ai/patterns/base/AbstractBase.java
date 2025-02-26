@@ -107,7 +107,8 @@ public abstract class AbstractBase {
     // ------------------------------------------------------------
 
     public static final String ASTRA_TOKEN        = System.getenv("ASTRA_TOKEN");
-    public static final String ASTRA_API_ENDPOINT = "https://68614272-9c81-4dca-ac49-43d4d969bdd2-us-east1.apps.astra.datastax.com";
+    // public static final String ASTRA_API_ENDPOINT = "https://68614272-9c81-4dca-ac49-43d4d969bdd2-us-east1.apps.astra.datastax.com";
+    public static final String ASTRA_API_ENDPOINT = "https://1839c746-6788-481d-8413-7b7d49fa9ea3-us-east1.apps.astra.datastax.com";
 
     public Database getAstraDatabase() {
         // verbose
