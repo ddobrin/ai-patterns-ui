@@ -21,7 +21,7 @@
         overflow: hidden;
 
         .settings {
-            width: 450px;
+            width: 470px;
             display: flex;
             flex-direction: column;
             gap: var(--lumo-space-s);

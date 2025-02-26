@@ -43,7 +43,8 @@ const defaultOptions: ChatOptions = {
   useGuardrails: false,
   evaluateResponse: false,
   chunkingType: ChunkingType.NONE,
-  retrievalType: RetrievalType.NONE
+  retrievalType: RetrievalType.NONE,
+  writeActions: false
 };
 
 export default function AiPatterns() {
@@ -79,17 +80,14 @@ export default function AiPatterns() {
             <RadioButton value={RetrievalType.FILTERING} label="Filtering" />
             <RadioButton value={RetrievalType.QUERY_COMPRESSION} label="Query Compression" />
             <RadioButton value={RetrievalType.QUERY_ROUTING} label="Query Routing" />
-            <RadioButton value={RetrievalType.HYDE} label="HYDE" />
+            <RadioButton value={RetrievalType.HYDE} label="Hypothetical Document Embedding" />
             <RadioButton value={RetrievalType.RERANKING} label="Reranking" />
           </RadioGroup>
           <h3>Settings</h3>
           <Checkbox label="Use Vertex" {...field(model.useVertex)} />
           <h3>Capabilities</h3>
-          {/*<Checkbox label="Use Tools" {...field(model.useTools)} />*/}
-          {/*<Checkbox label="Use Agents" {...field(model.useAgents)} />*/}
-          {/* New container for side-by-side checkboxes */}
           <div className="side-by-side-checkboxes">
-            <Checkbox label="Use Tools" {...field(model.useTools)} />
+            <Checkbox label="Use Functions" {...field(model.useTools)} />
             <Checkbox label="Use Agents" {...field(model.useAgents)} />
             <Checkbox label="Use WebSearch" {...field(model.useWebsearch)} />
           </div>
@@ -99,7 +97,9 @@ export default function AiPatterns() {
             <Checkbox label="Enable guardrails" {...field(model.useGuardrails)} />
           </div>
           <h3>Evaluations</h3>
-          <Checkbox label="Evaluate response" {...field(model.evaluateResponse)} />
+          <Checkbox label="Evaluate responses" {...field(model.evaluateResponse)} />
+          <h3>Advanced Capabilities</h3>
+          <Checkbox label="Write actions" {...field(model.writeActions)} />
           <div className="space"></div>
           <div className="built-with">UI built with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         </div>

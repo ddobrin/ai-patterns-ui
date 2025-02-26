@@ -43,7 +43,8 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         boolean evaluateResponse,
         boolean useTools,
         ChunkingType chunkingType,
-        RetrievalType retrievalType) {
+        RetrievalType retrievalType,
+        boolean writeActions) {
     }
 
     private final ChatService chatService;
@@ -67,7 +68,8 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                 false,
                 false,
                 ChunkingType.NONE,
-                RetrievalType.NONE);
+                RetrievalType.NONE,
+                false);
         }
 
         if (options.useAgents()) {
