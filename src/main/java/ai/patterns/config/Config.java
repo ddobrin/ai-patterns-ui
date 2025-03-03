@@ -1,6 +1,6 @@
 package ai.patterns.config;
 
-import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
+import static ai.patterns.utils.Ansi.cyan;
 
 import ai.patterns.base.AbstractBase;
 import com.datastax.astra.client.DataAPIClient;
@@ -16,8 +16,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class Config extends AbstractBase {
-  private static final String COLLECTION_NAME = "berlin_hypothetical_questions";
+  private static final String COLLECTION_NAME = "hypothetical_questions";
   private static final Database DATABASE = new DataAPIClient(ASTRA_TOKEN).getDatabase(ASTRA_API_ENDPOINT);
+  public static final String PARAGRAPH_METADATA_KEY = "paragraph";
 
   private static boolean collectionExists() {
     return DATABASE.collectionExists(COLLECTION_NAME);

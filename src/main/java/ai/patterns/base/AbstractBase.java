@@ -1,7 +1,7 @@
 package ai.patterns.base;
 
 import static com.datastax.astra.client.model.SimilarityMetric.COSINE;
-import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
+import static ai.patterns.utils.Ansi.cyan;
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
 
 import com.datastax.astra.client.Collection;

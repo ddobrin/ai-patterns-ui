@@ -1,7 +1,7 @@
 package ai.patterns.services;
 
-import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
-import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
+import static ai.patterns.utils.Ansi.cyan;
+import static ai.patterns.utils.Ansi.blue;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.tools.HistoryGeographyTool;
@@ -47,7 +47,7 @@ public class AgenticRAGService extends AbstractBase {
 
     String report = assistant.chat(chatId, systemMessage, userMessage);
 
-    System.out.println(magenta("\n>>> FINAL RESPONSE REPORT:\n"));
+    System.out.println(blue("\n>>> FINAL RESPONSE REPORT:\n"));
     System.out.println(cyan(report));
 
     return report;
@@ -65,39 +65,16 @@ public class AgenticRAGService extends AbstractBase {
     return assistant.stream(chatId, systemMessage, userMessage)
         .doOnNext(System.out::print)
         .doOnComplete(() -> {
-          System.out.println(magenta("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
+          System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
         });
 
   }
 
-  // private static final String SYSTEM_MESSAGE = """
-  //           You are a knowledgeable history, geography and tourist assistant.
-  //           Your role is to write reports about a particular location or event,
-  //           focusing on the key topics asked by the user.
-  //
-  //           Think step by step:
-  //           1) Identify the key topics the user is interested
-  //           2) For each topic, devise a list of questions corresponding to those topics
-  //           3) Search those questions in the database
-  //           4) Collect all those answers together, and create the final report.
-  //           {{systemMessage}}
-  //           """;
-
-  private static final String SYSTEM_MESSAGE = """
-            You are a knowledgeable history, geography and tourist assistant.
-            Your role is to write reports about a particular location or event,
-            focusing on the key topics asked by the user.
-            
-            Let us focus on world capitals today.
-            
-            {{systemMessage}}
-            """;
-
   interface AgenticAssistant {
-        @SystemMessage(SYSTEM_MESSAGE)
+        @SystemMessage(fromResource = "templates/agentic-rag-service-system.txt")
         String chat(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
 
-        @SystemMessage(SYSTEM_MESSAGE)
+        @SystemMessage(fromResource = "templates/agentic-rag-service-system.txt")
         Flux<String> stream(@MemoryId String chatId, @V("systemMessage") String systemMessage, @UserMessage String userMessage);
 
   }

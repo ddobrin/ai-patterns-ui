@@ -53,8 +53,8 @@ SELECT 'Antarctica'
     WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Antarctica');
 
 INSERT INTO continents (continent_name)
-SELECT 'Australia'
-    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Australia');
+SELECT 'Oceania'
+    WHERE NOT EXISTS (SELECT 1 FROM continents WHERE continent_name = 'Oceania');
 
 INSERT INTO continents (continent_name)
 SELECT 'North America'

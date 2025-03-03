@@ -1,8 +1,8 @@
 package ai.patterns.tools;
 
-import static com.datastax.astra.internal.utils.AnsiUtils.cyan;
-import static com.datastax.astra.internal.utils.AnsiUtils.magenta;
-import static com.datastax.astra.internal.utils.AnsiUtils.yellow;
+import static ai.patterns.utils.Ansi.cyan;
+import static ai.patterns.utils.Ansi.blue;
+import static ai.patterns.utils.Ansi.yellow;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.data.TopicReport;
@@ -36,7 +36,7 @@ public class TouristBureauMCPTool extends AbstractBase {
 
   @Tool("Get printable article about a city")
   TopicReport getPrintableArticle(String city){
-    System.out.println(magenta(">>> Invoking `getPrintableArticle` tool with query: ") + city);
+    System.out.println(blue(">>> Invoking `getPrintableArticle` tool with query: ") + city);
 
     String text = loadDocumentText(String.format("capitals/%s_article.txt", city)).text();
 
@@ -45,7 +45,7 @@ public class TouristBureauMCPTool extends AbstractBase {
 
   @Tool("Find article in the FileSystem")
   TopicReport findArticleInFilesystem(String city) throws Exception{
-    System.out.println(magenta(">>> Invoking `findArticleInFilesystem` tool with city: ") + city);
+    System.out.println(blue(">>> Invoking `findArticleInFilesystem` tool with city: ") + city);
 
     // Use NPX
     McpTransport transport = new StdioMcpTransport.Builder()
