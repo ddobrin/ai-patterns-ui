@@ -115,7 +115,11 @@ export default function AiPatterns() {
           <div className="space"></div>
           <div className="built-with">UI built with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         </div>
-        <Chat chatId={chatId} service={ChatEndpoint} options={value}/>
+        <Chat 
+          chatId={chatId} 
+          service={ChatEndpoint} 
+          options={value} 
+          acceptedFiles=".txt, .md"/>
       </main>
     </div>
   );

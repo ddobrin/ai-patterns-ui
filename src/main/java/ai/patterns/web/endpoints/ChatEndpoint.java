@@ -1,19 +1,35 @@
 package ai.patterns.web.endpoints;
 
-import ai.patterns.services.AgenticRAGService;
-import ai.patterns.services.ChatService;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.hilla.BrowserCallable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.jetbrains.annotations.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import org.vaadin.components.experimental.chat.AiChatService;
-import reactor.core.publisher.Flux;
 
-import java.util.List;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.BrowserCallable;
+
+import ai.patterns.services.AgenticRAGService;
+import ai.patterns.services.ChatService;
+import reactor.core.publisher.Flux;
 
 @BrowserCallable
 @AnonymousAllowed
 public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
+
+    private static final String ATTACHMENT_TEMPLATE = """
+        <attachment filename="%s">
+                %s
+        </attachment>
+        """;
+        
+    // Map to store attachments by chatId
+    private final Map<String, Map<String, String>> attachments = new HashMap<>();
 
     public enum ChunkingType {
         NONE,
@@ -71,33 +87,83 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                 RetrievalType.NONE,
                 false);
         }
+        
+        // Append attachments to the user message if any exist for this chat
+        String messageWithAttachments = userMessage;
+        Map<String, String> chatAttachments = attachments.get(chatId);
+        if (chatAttachments != null && !chatAttachments.isEmpty()) {
+            StringBuilder messageBuilder = new StringBuilder(userMessage);
+            
+            // Append each attachment using the template
+            for (Map.Entry<String, String> entry : chatAttachments.entrySet()) {
+                String filename = entry.getKey();
+                String content = entry.getValue();
+                messageBuilder.append("\n\n").append(String.format(ATTACHMENT_TEMPLATE, filename, content));
+            }
+            
+            messageWithAttachments = messageBuilder.toString();
+            
+            // Clear attachments after appending them
+            attachments.remove(chatId);
+        }
 
+        // Use the final message with attachments
+        final String finalMessage = messageWithAttachments;
+        
         if (options.useAgents()) {
             return agenticRAGService.stream(
                 chatId,
                 options.systemMessage(),
-                userMessage,
+                finalMessage,
                 options);
         } else {
             return chatService.stream(
                 chatId,
                 options.systemMessage(),
-                userMessage,
+                finalMessage,
                 options
             );
         }
     }
 
-    // This demo does not use attachments or recalling message history
-
     @Override
     public String uploadAttachment(String chatId, MultipartFile multipartFile) {
-        return "";
+        String originalFilename = multipartFile.getOriginalFilename();
+        
+        // Validate file type (only txt and md files are supported)
+        if (originalFilename == null || 
+            !(originalFilename.endsWith(".txt") || originalFilename.endsWith(".md"))) {
+            throw new IllegalArgumentException("Only .txt and .md files are supported");
+        }
+        
+        try {
+            // Read file content
+            String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
+            
+            // Generate a unique ID for the attachment
+            String attachmentId = UUID.randomUUID().toString();
+            
+            // Store the attachment
+            attachments.computeIfAbsent(chatId, k -> new HashMap<>())
+                      .put(originalFilename, content);
+            
+            return attachmentId;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read attachment", e);
+        }
     }
 
     @Override
     public void removeAttachment(String chatId, String attachmentId) {
-        // no-op
+        Map<String, String> chatAttachments = attachments.get(chatId);
+        if (chatAttachments != null) {
+            chatAttachments.remove(attachmentId);
+            
+            // Remove the chat entry if there are no more attachments
+            if (chatAttachments.isEmpty()) {
+                attachments.remove(chatId);
+            }
+        }
     }
 
     @Override
@@ -106,7 +172,8 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
     }
 
     @Override
-    public void closeChat(String s) {
-
+    public void closeChat(String chatId) {
+        // Clear all attachments for this chat when it's closed
+        attachments.remove(chatId);
     }
 }
