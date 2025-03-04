@@ -12,6 +12,9 @@
         padding: var(--lumo-space-m);
         border-bottom: 1px solid var(--lumo-contrast-20pct);
         flex-shrink: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     main {

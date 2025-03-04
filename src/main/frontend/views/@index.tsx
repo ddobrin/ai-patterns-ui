@@ -3,11 +3,13 @@ import {useEffect, useState} from "react";
 import { Chat } from '@vaadin/flow-frontend/chat/Chat.js';
 import {ChatEndpoint} from "Frontend/generated/endpoints";
 import ChatOptions from "Frontend/generated/ai/patterns/web/endpoints/ChatEndpoint/ChatOptions";
+import '@vaadin/icons';
+import '@vaadin/vaadin-lumo-styles/icons';
 
 import './index.css';
 import {useForm} from "@vaadin/hilla-react-form";
 import ChatOptionsModel from "Frontend/generated/ai/patterns/web/endpoints/ChatEndpoint/ChatOptionsModel";
-import {Checkbox, ComboBox, TextArea, RadioGroup, RadioButton} from "@vaadin/react-components";
+import {Checkbox, ComboBox, TextArea, RadioGroup, RadioButton, Button, Icon, Tooltip} from "@vaadin/react-components";
 
 const models = [
   'gemini-2.0-flash-001',
@@ -48,7 +50,7 @@ const defaultOptions: ChatOptions = {
 };
 
 export default function AiPatterns() {
-  const [chatId] = useState(nanoid());
+  const [chatId, setChatId] = useState(nanoid());
 
   const {field, model, read, value} = useForm(ChatOptionsModel);
 
@@ -56,10 +58,20 @@ export default function AiPatterns() {
     read(defaultOptions)
   }, []);
 
+  async function resetChat() {
+    setChatId(nanoid());
+  }
+
+
   return (
     <div className="ai-patterns-ui">
       <header>
         <h1>World Capitals</h1>
+
+        <Button onClick={resetChat} theme="icon small contrast tertiary">
+          <Icon icon="lumo:reload" />
+          <Tooltip slot="tooltip" text="New chat" />
+        </Button>
       </header>
       <main>
         <div className="settings">
