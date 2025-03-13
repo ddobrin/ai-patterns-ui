@@ -14,7 +14,8 @@ import {Checkbox, ComboBox, TextArea, RadioGroup, RadioButton, Button, Icon, Too
 const models = [
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-thinking-exp-01-21',
-  'gemini-2.0-pro-exp-02-05'
+  'gemini-2.0-pro-exp-02-05',
+  'gemini-2.0-flash-exp'
 ];
 
 export enum ChunkingType {
@@ -99,7 +100,7 @@ export default function AiPatterns() {
           <Checkbox label="Use Vertex" {...field(model.useVertex)} />
           <h3>Capabilities</h3>
           <div className="side-by-side-checkboxes">
-            <Checkbox label="Use Functions" {...field(model.useTools)} />
+            <Checkbox label="Enable RAG" {...field(model.useTools)} />
             <Checkbox label="Use Agents" {...field(model.useAgents)} />
             <Checkbox label="Use WebSearch" {...field(model.useWebsearch)} />
           </div>
@@ -113,7 +114,7 @@ export default function AiPatterns() {
           <h3>Advanced Capabilities</h3>
           <Checkbox label="Write actions" {...field(model.writeActions)} />
           <div className="space"></div>
-          <div className="built-with">UI built with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
+          <div className="built-with">UI built in Java with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         </div>
         <Chat 
           chatId={chatId} 
