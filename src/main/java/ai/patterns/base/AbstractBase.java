@@ -1,5 +1,6 @@
 package ai.patterns.base;
 
+import static ai.patterns.utils.Models.MODEL_EMBEDDING_TEXT;
 import static com.datastax.astra.client.model.SimilarityMetric.COSINE;
 import static ai.patterns.utils.Ansi.cyan;
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
@@ -45,18 +46,6 @@ public abstract class AbstractBase {
     // ------------------------------------------------------------
     //                           GEMINI STUFF
     // ------------------------------------------------------------
-
-    // Chat Models
-    protected final String MODEL_GEMINI_PRO       = "gemini-2.0-pro-exp-02-05";
-    protected final String MODEL_GEMINI_FLASH     = "gemini-2.0-flash-001";
-    protected final String MODEL_GEMINI_FLASH_LITE = "gemini-2.0-flash-lite-preview-02-05";
-    protected final String MODEL_GEMINI_FLASH_THINKING = "gemini-2.0-flash-thinking-exp-01-21";
-
-    // Embedding Models
-    // https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api?hl=en&authuser=2
-    protected final String MODEL_EMBEDDING_MULTILINGUAL = "text-multilingual-embedding-002";
-    protected final String MODEL_EMBEDDING_TEXT         = "text-embedding-005";
-    protected final int    MODEL_EMBEDDING_DIMENSION    = 768;
 
     /** Create a chat model. */
     protected ChatLanguageModel getChatLanguageModel(final String modelName) {
@@ -107,7 +96,6 @@ public abstract class AbstractBase {
     // ------------------------------------------------------------
 
     public static final String ASTRA_TOKEN        = System.getenv("ASTRA_TOKEN");
-    // public static final String ASTRA_API_ENDPOINT = "https://68614272-9c81-4dca-ac49-43d4d969bdd2-us-east1.apps.astra.datastax.com";
     public static final String ASTRA_API_ENDPOINT = "https://1839c746-6788-481d-8413-7b7d49fa9ea3-us-east1.apps.astra.datastax.com";
 
     public Database getAstraDatabase() {
@@ -219,25 +207,4 @@ public abstract class AbstractBase {
         Path path = new File(Objects.requireNonNull(getClass().getResource("/" + fileName)).getFile()).toPath();
         return FileSystemDocumentLoader.loadDocument(path, new TextDocumentParser());
     }
-
-    // @SuppressWarnings("unchecked")
-    // public  List<Quote> loadQuotes(String filePath) throws IOException {
-    //     URL fileURL = getClass().getResource(filePath);
-    //     File inputFile = new File(fileURL.getFile());
-    //     LinkedHashMap<String, Object> sampleQuotes = new ObjectMapper().readValue(inputFile, LinkedHashMap.class);
-    //     List<Quote> result  = new ArrayList<>();
-    //     AtomicInteger quote_idx = new AtomicInteger(0);
-    //     ((LinkedHashMap<?,?>) sampleQuotes.get("quotes")).forEach((k,v) -> {
-    //         ((ArrayList<?>)v).forEach(q -> {
-    //             Map<String, Object> entry = (Map<String,Object>) q;
-    //             String author = (String) k;//(String) entry.get("author");
-    //             String body = (String) entry.get("body");
-    //             List<String> tags = (List<String>) entry.get("tags");
-    //             String rowId = "q_" + author + "_" + quote_idx.getAndIncrement();
-    //             result.add(new Quote(rowId, author, tags, body));
-    //         });
-    //     });
-    //     return result;
-    // }
-
 }

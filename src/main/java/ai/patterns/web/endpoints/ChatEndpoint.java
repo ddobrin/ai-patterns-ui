@@ -1,5 +1,6 @@
 package ai.patterns.web.endpoints;
 
+import ai.patterns.utils.Models;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -57,7 +58,7 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         boolean enableSafety,
         boolean useGuardrails,
         boolean evaluateResponse,
-        boolean useTools,
+        boolean enableRAG,
         ChunkingType chunkingType,
         RetrievalType retrievalType,
         boolean writeActions) {
@@ -78,7 +79,7 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                 true,
                 false,
                 false,
-                "gemini-2.0-flash-001",
+                 Models.MODEL_GEMINI_FLASH,
                 true,
                 true,
                 false,
@@ -109,7 +110,8 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
 
         // Use the final message with attachments
         final String finalMessage = messageWithAttachments;
-        
+
+        // follow separate streams for chat, respectively agents
         if (options.useAgents()) {
             return agenticRAGService.stream(
                 chatId,

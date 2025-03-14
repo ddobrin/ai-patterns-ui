@@ -3,6 +3,7 @@ package ai.patterns.tools;
 import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.blue;
 import static ai.patterns.utils.Ansi.yellow;
+import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.data.TopicReport;

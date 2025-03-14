@@ -38,7 +38,7 @@ export enum RetrievalType {
 const defaultOptions: ChatOptions = {
   systemMessage: 'You are a knowledgeable history, geography and tourist assistant.\n\nYour role is to write reports about a particular location or event, focusing on the key topics asked by the user.\n\nLet us focus on world capitals today',
   useVertex: true,
-  useTools: false,
+  enableRAG: false,
   useAgents: false,
   useWebsearch: false,
   model: models[0],
@@ -100,7 +100,7 @@ export default function AiPatterns() {
           <Checkbox label="Use Vertex" {...field(model.useVertex)} />
           <h3>Capabilities</h3>
           <div className="side-by-side-checkboxes">
-            <Checkbox label="Enable RAG" {...field(model.useTools)} />
+            <Checkbox label="Enable RAG" {...field(model.enableRAG)} />
             <Checkbox label="Use Agents" {...field(model.useAgents)} />
             <Checkbox label="Use WebSearch" {...field(model.useWebsearch)} />
           </div>
