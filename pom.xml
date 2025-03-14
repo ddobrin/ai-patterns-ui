@@ -25,6 +25,7 @@
 		<astra-db-java.version>1.5.3</astra-db-java.version>
 		<snowball.version>1.3.0.581.1</snowball.version>
 		<djl.version>0.31.1</djl.version>
+		<postgressql.version>42.7.5</postgressql.version>
 		<assertj.version>3.27.0</assertj.version>
 		<junit-jupiter.version>5.11.4</junit-jupiter.version>
 		<maven.plugin.compiler.version>3.9.9</maven.plugin.compiler.version>
@@ -38,6 +39,15 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
 		<!-- Vaadin -->
@@ -205,6 +215,18 @@
 			<groupId>ai.djl</groupId>
 			<artifactId>basicdataset</artifactId>
 			<version>${djl.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+			<version>${postgressql.version}</version>
+		</dependency>
+		<!-- HikariCP (already included with Spring Boot, but explicit for clarity) -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
 		</dependency>
 
 		<dependency>

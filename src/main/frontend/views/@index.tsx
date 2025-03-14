@@ -36,7 +36,7 @@ export enum RetrievalType {
 }
 
 const defaultOptions: ChatOptions = {
-  systemMessage: 'You are a knowledgeable history, geography and tourist assistant.\n\nYour role is to write reports about a particular location or event, focusing on the key topics asked by the user.\n\nLet us focus on world capitals today',
+  systemMessage: 'You are a knowledgeable history, geography and tourist assistant, knowing everything about the capitals of the world.\n\nYour role is to write reports about a particular location or event, focusing on the key topics asked by the user.\n\nLet us focus on world capitals today',
   useVertex: true,
   enableRAG: false,
   useAgents: false,

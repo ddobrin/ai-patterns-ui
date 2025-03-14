@@ -4,13 +4,19 @@ import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.blue;
 
 import ai.patterns.base.AbstractBase;
+import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,11 +26,14 @@ public class ChatService extends AbstractBase {
   // with multiple models, AI framework starters are not yet configured for supporting multiple models
   private Environment env;
   private final ChatMemoryProvider chatMemoryProvider;
+  private final CapitalDataAccessDAO dataAccess;
 
   public ChatService(Environment env,
-                     ChatMemoryProvider chatMemoryProvider) {
+                     ChatMemoryProvider chatMemoryProvider,
+                     CapitalDataAccessDAO dataAccess) {
     this.env = env;
     this.chatMemoryProvider = chatMemoryProvider;
+    this.dataAccess = dataAccess;
   }
 
   public String chat(String chatId,
@@ -52,12 +61,53 @@ public class ChatService extends AbstractBase {
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
         .chatMemoryProvider(chatMemoryProvider)
         .build();
-        return assistant.stream(chatId, systemMessage, userMessage)
+
+        // augment with vector data RAG is enabled
+        String vectorData = augmentUserMessage(userMessage, options);
+
+        String augmentedUserMessage = PromptTemplate.from("""
+                            Here's the question from the user:
+                            <question>
+                            {{userMessage}}
+                            </question>
+                            
+                            Answer the question using the following information:
+                            <excerpts>
+                            {{contents}}
+                            </excerpts>
+                            """).apply(Map.of(
+            "userMessage", userMessage,
+            "contents", vectorData
+        )).toUserMessage().singleText();
+
+        return assistant.stream(chatId, systemMessage, augmentedUserMessage)
             .doOnNext(System.out::print)
             .doOnComplete(() -> {
               System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
             });
     }
+
+  private String augmentUserMessage(String userMessage, ChatOptions options) {
+    // no RAG? ok
+    if (!options.enableRAG()) {
+      return "";
+    }
+
+    // search the vector store by query and embedding type !
+    List<Map<String, Object>> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
+
+    if (vectorData == null || vectorData.isEmpty()) {
+      System.out.println("Vector data is empty or null.");
+      return "No data found in the vector store";
+    }
+
+    return vectorData.stream()
+        .map(map -> Optional.ofNullable(map.get("chunk")))
+        .filter(Optional::isPresent) //filter out optionals that are empty
+        .map(Optional::get) //get the value from the optional.
+        .map(Object::toString) //convert each object to string.
+        .collect(Collectors.joining("\n"));
+  }
 
   interface ChatAssistant {
     @SystemMessage(fromResource = "templates/chat-service-system.txt")

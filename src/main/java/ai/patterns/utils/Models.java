@@ -11,4 +11,7 @@ public class Models {
   public static final String MODEL_EMBEDDING_MULTILINGUAL = "text-multilingual-embedding-002";
   public static final String MODEL_EMBEDDING_TEXT         = "text-embedding-005";
   public static final int    MODEL_EMBEDDING_DIMENSION    = 768;
+
+  public static final int MAX_RETRIES = 3;
+  public static final int DB_RETRIEVAL_LIMIT = 5;
 }
