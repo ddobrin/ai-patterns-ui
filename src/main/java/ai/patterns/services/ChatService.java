@@ -6,6 +6,7 @@ import static ai.patterns.utils.Ansi.blue;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
+import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
@@ -23,6 +24,8 @@ import reactor.core.publisher.Flux;
 
 @Service
 public class ChatService extends AbstractBase {
+
+  // private final ChatEndpoint chatEndpoint;
   // with multiple models, AI framework starters are not yet configured for supporting multiple models
   private Environment env;
   private final ChatMemoryProvider chatMemoryProvider;
@@ -34,6 +37,7 @@ public class ChatService extends AbstractBase {
     this.env = env;
     this.chatMemoryProvider = chatMemoryProvider;
     this.dataAccess = dataAccess;
+    // this.chatEndpoint = chatEndpoint;
   }
 
   public String chat(String chatId,
@@ -62,10 +66,11 @@ public class ChatService extends AbstractBase {
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 
-        // augment with vector data RAG is enabled
-        String vectorData = augmentUserMessage(userMessage, options);
+        // augment with vector data if RAG is enabled
+        String additionalVectorData = augmentUserMessageWithVectorData(userMessage, options);
 
-        String augmentedUserMessage = PromptTemplate.from("""
+        // build message
+        String finalUserMessage = PromptTemplate.from("""
                             Here's the question from the user:
                             <question>
                             {{userMessage}}
@@ -77,19 +82,19 @@ public class ChatService extends AbstractBase {
                             </excerpts>
                             """).apply(Map.of(
             "userMessage", userMessage,
-            "contents", vectorData
+            "contents", additionalVectorData
         )).toUserMessage().singleText();
 
-        return assistant.stream(chatId, systemMessage, augmentedUserMessage)
+        return assistant.stream(chatId, systemMessage, finalUserMessage)
             .doOnNext(System.out::print)
             .doOnComplete(() -> {
               System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
             });
     }
 
-  private String augmentUserMessage(String userMessage, ChatOptions options) {
+  private String augmentUserMessageWithVectorData(String userMessage, ChatOptions options) {
     // no RAG? ok
-    if (!options.enableRAG()) {
+    if (!options.enableRAG() || (options.chunkingType() == ChunkingType.NONE)) {
       return "";
     }
 

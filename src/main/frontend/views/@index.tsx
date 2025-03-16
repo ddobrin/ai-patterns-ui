@@ -81,7 +81,7 @@ export default function AiPatterns() {
           <TextArea label="System prompt" {...field(model.systemMessage)} />
           <h3>Chunking Methods</h3>
           <RadioGroup theme={"vertical"} {...field(model.chunkingType)}>
-            <RadioButton value={ChunkingType.NONE} label="None" />
+            <RadioButton value={ChunkingType.NONE} label="None (Prompt Stuffing)" />
             <RadioButton value={ChunkingType.HIERARCHICAL} label="Hierarchical Chunking" />
             <RadioButton value={ChunkingType.HYPOTHETICAL} label="Hypothetical Questions" />
             <RadioButton value={ChunkingType.CONTEXTUAL} label="Contextual Retrieval" />
@@ -99,7 +99,7 @@ export default function AiPatterns() {
           <h3>Settings</h3>
           <Checkbox label="Use Vertex" {...field(model.useVertex)} />
           <h3>Capabilities</h3>
-          <div className="side-by-side-checkboxes">
+          <div className="vertical-checkboxes">
             <Checkbox label="Enable RAG" {...field(model.enableRAG)} />
             <Checkbox label="Use Agents" {...field(model.useAgents)} />
             <Checkbox label="Use WebSearch" {...field(model.useWebsearch)} />
