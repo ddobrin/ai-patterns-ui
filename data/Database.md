@@ -17,6 +17,7 @@
  # Start with
  ./alloydb-auth-proxy projects/genai-playground24/locations/us-central1/clusters/alloydb-aip-01/instances/alloydb-aip-01-pr --public-ip
 
+#--- connectivity checks ---
 # Start psql for connectivity check
 psql -h 127.0.0.1 -p 5432 -U postgres -d library -W
 
@@ -28,6 +29,4 @@ select capital, country
 # describe tables
 \d public.capitals
 \d public. continents
-
-
 ``

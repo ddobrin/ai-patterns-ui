@@ -1,0 +1,17 @@
+       Here's the question from the user:
+        <question>
+        {{userMessage}}
+        </question>
+
+        Answer the question using the following information:
+        <excerpts>
+        {{contents}}
+        </excerpts>
+
+        Please add at the end of your answer, the following String as-is, for reference purposes:
+        ---------------------
+        ===== SOURCES =====
+
+        {{sources}}
+
+        ---------------------

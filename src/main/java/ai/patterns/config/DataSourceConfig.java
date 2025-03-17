@@ -1,4 +1,4 @@
-package ai.patterns.dao;
+package ai.patterns.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

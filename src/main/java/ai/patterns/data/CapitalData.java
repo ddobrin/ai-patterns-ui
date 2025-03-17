@@ -1,4 +1,4 @@
-package ai.patterns.dao;
+package ai.patterns.data;
 
 import java.util.List;
 

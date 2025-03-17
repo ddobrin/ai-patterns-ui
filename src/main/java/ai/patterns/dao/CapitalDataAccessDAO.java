@@ -1,5 +1,7 @@
 package ai.patterns.dao;
 
+import ai.patterns.data.CapitalData;
+import ai.patterns.data.CapitalDataRAG;
 import ai.patterns.utils.Models;
 import java.sql.PreparedStatement;
 import java.sql.Statement;

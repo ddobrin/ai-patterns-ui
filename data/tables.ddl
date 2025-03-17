@@ -83,39 +83,70 @@ INSERT INTO capital_continents (capital_id, continent_id)
 VALUES ((SELECT capital_id FROM capitals WHERE capital = 'Paris'), (SELECT continent_id FROM continents WHERE continent_name = 'Europe'));
 
 
--- SELECT data
+-- SELECT data from the DB
 SELECT
-    c.capital_id,
+    cc.chunk_id,
     c.capital,
     c.country,
-    c.embed,
-    c.content,
-    c.chunk,
-    c.embedding,
-    cont.continent_name
+    cc.embed::text,
+        cc.content,
+    cc.chunk,
+    string_agg(cont.continent_name, ', ') AS continents,
+    cc.embedding <-> public.embedding('text-embedding-005', 'population of Berlin')::vector AS distance
 FROM
-    capitals AS c
+    capital_chunks cc
         JOIN
-    capital_continents AS cc ON c.capital_id = cc.capital_id
-        JOIN
-    continents AS cont ON cc.continent_id = cont.continent_id
+    capitals c ON cc.capital_id = c.capital_id
+        LEFT JOIN
+    capital_continents cc_rel ON c.capital_id = cc_rel.capital_id
+        LEFT JOIN
+    continents cont ON cc_rel.continent_id = cont.continent_id
 WHERE
-    c.capital = 'Ankara';
+    cc.embed = 'hypothetical'
+GROUP BY
+    cc.chunk_id,
+    c.capital,
+    c.country,
+    cc.embed,
+    cc.content,
+    cc.chunk,
+    cc.embedding
+ORDER BY
+    distance ASC
+    LIMIT 10;
 
+--- parameterized SQL query
+PREPARE embedding_search(text, embed_type) AS
 SELECT
-    c.capital_id,
+    cc.chunk_id,
     c.capital,
     c.country,
-    c.embed,
-    c.content,
-    c.chunk,
-    c.embedding,
-    cont.continent_name
+    cc.embed::text,
+        cc.content,
+    cc.chunk,
+    string_agg(cont.continent_name, ', ') AS continents,
+    cc.embedding <-> public.embedding('text-embedding-005', $1)::vector AS distance
 FROM
-    capitals AS c
+    capital_chunks cc
         JOIN
-    capital_continents AS cc ON c.capital_id = cc.capital_id
-        JOIN
-    continents AS cont ON cc.continent_id = cont.continent_id
+    capitals c ON cc.capital_id = c.capital_id
+        LEFT JOIN
+    capital_continents cc_rel ON c.capital_id = cc_rel.capital_id
+        LEFT JOIN
+    continents cont ON cc_rel.continent_id = cont.continent_id
 WHERE
-    c.capital = 'Paris';
+    cc.embed = $2
+GROUP BY
+    cc.chunk_id,
+    c.capital,
+    c.country,
+    cc.embed,
+    cc.content,
+    cc.chunk,
+    cc.embedding
+ORDER BY
+    distance ASC
+    LIMIT 10;
+
+-- Execute with specific parameters:
+EXECUTE embedding_search('population of Berlin', 'hypothetical');

@@ -1,0 +1,9 @@
+       Here's the question from the user:
+        <question>
+        {{userMessage}}
+        </question>
+
+        Answer the question using the following information:
+        <excerpts>
+        {{contents}}
+        </excerpts>

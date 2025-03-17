@@ -4,13 +4,13 @@ import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.blue;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
 import static ai.patterns.utils.RAGUtils.formatVectorData;
+import static ai.patterns.utils.RAGUtils.prepareUserMessagesNoSources;
+import static ai.patterns.utils.RAGUtils.prepareUserMessagesWithSources;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
-import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
-import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
@@ -77,33 +77,10 @@ public class ChatService extends AbstractBase {
         .map(Object::toString) //convert each object to string.
         .collect(Collectors.joining("\n"));
 
-    // format sources to send back to UI
-    String sources = formatVectorData(vectorDataList);
-
     // build message
-    String finalUserMessage = PromptTemplate.from("""
-        Here's the question from the user:
-        <question>
-        {{userMessage}}
-        </question>
-        
-        Answer the question using the following information:
-        <excerpts>
-        {{contents}}
-        </excerpts>
-        
-        Please add at the end of your answer, the following String as-is, for reference purposes:
-        ---------------------
-        ===== SOURCES =====
-        
-        {{sources}}
-        
-        ---------------------
-        """).apply(Map.of(
-        "userMessage", userMessage,
-        "contents", additionalVectorData,
-        "sources", sources
-    )).toUserMessage().singleText();
+    String finalUserMessage = options.showDataSources() ?
+        prepareUserMessagesWithSources(userMessage, additionalVectorData, formatVectorData(vectorDataList)) :
+        prepareUserMessagesNoSources(userMessage, additionalVectorData);
 
     return assistant.stream(chatId, systemMessage, finalUserMessage)
         .doOnNext(System.out::print)
