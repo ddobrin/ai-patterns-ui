@@ -47,7 +47,8 @@ const defaultOptions: ChatOptions = {
   evaluateResponse: false,
   chunkingType: ChunkingType.NONE,
   retrievalType: RetrievalType.NONE,
-  writeActions: false
+  writeActions: false,
+  showDataSources: true
 };
 
 export default function AiPatterns() {
@@ -113,6 +114,8 @@ export default function AiPatterns() {
           <Checkbox label="Evaluate responses" {...field(model.evaluateResponse)} />
           <h3>Advanced Capabilities</h3>
           <Checkbox label="Write actions" {...field(model.writeActions)} />
+          <h3>Show sources</h3>
+          <Checkbox label="Show data sources" {...field(model.showDataSources)} />
           <div className="space"></div>
           <div className="built-with">UI built in Java with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         </div>

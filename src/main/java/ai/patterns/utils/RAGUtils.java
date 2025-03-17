@@ -23,7 +23,7 @@ public class RAGUtils
           String chunk = (String) map.get("chunk");
 
           if (distance != null && content != null && chunk != null) {
-            return String.format("[Distance: %.10f]\n--> CONTENT: %s\n\nCHUNK: %s [...]",
+            return String.format("[Distance: %.10f]\n\n--> CONTENT: %s\nCHUNK: %s [...]",
                 distance, content, chunk.substring(0, 200));
           } else {
             return "";

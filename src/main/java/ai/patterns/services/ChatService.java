@@ -94,7 +94,7 @@ public class ChatService extends AbstractBase {
         
         Please add at the end of your answer, the following String as-is, for reference purposes:
         ---------------------
-        SOURCES:
+        ===== SOURCES =====
         
         {{sources}}
         

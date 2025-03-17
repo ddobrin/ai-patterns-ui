@@ -61,7 +61,8 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         boolean enableRAG,
         ChunkingType chunkingType,
         RetrievalType retrievalType,
-        boolean writeActions) {
+        boolean writeActions,
+        boolean showDataSources) {
     }
 
     private final ChatService chatService;
@@ -84,9 +85,10 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                 true,
                 false,
                 false,
-                ChunkingType.NONE,
-                RetrievalType.NONE,
-                false);
+                 ChunkingType.NONE,
+                 RetrievalType.NONE,
+                false,
+                 true);
         }
         
         // Append attachments to the user message if any exist for this chat
