@@ -4,8 +4,7 @@ import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.blue;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
 import static ai.patterns.utils.RAGUtils.formatVectorData;
-import static ai.patterns.utils.RAGUtils.prepareUserMessagesNoSources;
-import static ai.patterns.utils.RAGUtils.prepareUserMessagesWithSources;
+import static ai.patterns.utils.RAGUtils.prepareUserMessage;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
@@ -16,6 +15,7 @@ import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,14 +28,11 @@ import reactor.core.publisher.Flux;
 public class ChatService extends AbstractBase {
 
   // with multiple models, AI framework starters are not yet configured for supporting multiple models
-  private Environment env;
   private final ChatMemoryProvider chatMemoryProvider;
   private final CapitalDataAccessDAO dataAccess;
 
-  public ChatService(Environment env,
-                     ChatMemoryProvider chatMemoryProvider,
+  public ChatService(ChatMemoryProvider chatMemoryProvider,
                      CapitalDataAccessDAO dataAccess) {
-    this.env = env;
     this.chatMemoryProvider = chatMemoryProvider;
     this.dataAccess = dataAccess;
   }
@@ -60,6 +57,7 @@ public class ChatService extends AbstractBase {
   public Flux<String> stream(String chatId,
                              String systemMessage,
                              String userMessage,
+                             String messageAttachments,
                              ChatOptions options) {
     ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
@@ -67,20 +65,27 @@ public class ChatService extends AbstractBase {
         .build();
 
     // augment with vector data if RAG is enabled
-    List<Map<String, Object>> vectorDataList = augmentWithVectorDataList(userMessage, options, dataAccess);
+    // no RAG? ok
+    List<Map<String, Object>> vectorDataList = new ArrayList<>();
+    String additionalVectorData = "";
+    String sources = "";
+    if (options.enableRAG()) {
+      vectorDataList = augmentWithVectorDataList(userMessage, options, dataAccess);
 
-    // format RAG data to send to LLM
-    String additionalVectorData = vectorDataList.stream()
-        .map(map -> Optional.ofNullable(map.get("chunk")))
-        .filter(Optional::isPresent) //filter out optionals that are empty
-        .map(Optional::get) //get the value from the optional.
-        .map(Object::toString) //convert each object to string.
-        .collect(Collectors.joining("\n"));
+      // format RAG data to send to LLM
+      additionalVectorData = vectorDataList.stream()
+          .map(map -> Optional.ofNullable(map.get("chunk")))
+          .filter(Optional::isPresent) //filter out optionals that are empty
+          .map(Optional::get) //get the value from the optional.
+          .map(Object::toString) //convert each object to string.
+          .collect(Collectors.joining("\n"));
 
-    // build message
-    String finalUserMessage = options.showDataSources() ?
-        prepareUserMessagesWithSources(userMessage, additionalVectorData, formatVectorData(vectorDataList)) :
-        prepareUserMessagesNoSources(userMessage, additionalVectorData);
+      // format sources in returnable format
+      sources = formatVectorData(vectorDataList);
+    }
+
+    //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)
+    String finalUserMessage = prepareUserMessage(userMessage, messageAttachments, additionalVectorData, sources, options);
 
     return assistant.stream(chatId, systemMessage, finalUserMessage)
         .doOnNext(System.out::print)

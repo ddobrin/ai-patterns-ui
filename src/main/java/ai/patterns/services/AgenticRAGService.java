@@ -55,6 +55,7 @@ public class AgenticRAGService extends AbstractBase {
   public Flux<String> stream(String chatId,
                         String systemMessage,
                         String userMessage,
+                        String messageAttachments,
                         ChatOptions options) {
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))

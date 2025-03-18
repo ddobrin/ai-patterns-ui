@@ -14,7 +14,6 @@ import {Checkbox, ComboBox, TextArea, RadioGroup, RadioButton, Button, Icon, Too
 const models = [
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-thinking-exp-01-21',
-  'gemini-2.0-pro-exp-02-05',
   'gemini-2.0-flash-exp'
 ];
 

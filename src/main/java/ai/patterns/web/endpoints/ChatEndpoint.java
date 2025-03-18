@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
 
     private static final String ATTACHMENT_TEMPLATE = """
+        Answer the user question using the information from the following attachment:
         <attachment filename="%s">
                 %s
         </attachment>
@@ -75,6 +76,7 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
 
     @Override
     public Flux<String> stream(String chatId, String userMessage, @Nullable ChatOptions options) {
+        // if chat options are not captured, set some defaults
         if (options == null) {
             options = new ChatOptions("",
                 true,
@@ -92,11 +94,11 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         }
         
         // Append attachments to the user message if any exist for this chat
-        String messageWithAttachments = userMessage;
+        String messageAttachments = "";
         Map<String, String> chatAttachments = attachments.get(chatId);
         if (chatAttachments != null && !chatAttachments.isEmpty()) {
-            StringBuilder messageBuilder = new StringBuilder(userMessage);
-            
+            StringBuilder messageBuilder = new StringBuilder();
+
             // Append each attachment using the template
             for (Map.Entry<String, String> entry : chatAttachments.entrySet()) {
                 String filename = entry.getKey();
@@ -104,27 +106,26 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                 messageBuilder.append("\n\n").append(String.format(ATTACHMENT_TEMPLATE, filename, content));
             }
             
-            messageWithAttachments = messageBuilder.toString();
-            
+            messageAttachments = messageBuilder.toString();
+
             // Clear attachments after appending them
             attachments.remove(chatId);
         }
-
-        // Use the final message with attachments
-        final String finalMessage = messageWithAttachments;
 
         // follow separate streams for chat, respectively agents
         if (options.useAgents()) {
             return agenticRAGService.stream(
                 chatId,
                 options.systemMessage(),
-                finalMessage,
+                userMessage,
+                messageAttachments,
                 options);
         } else {
             return chatService.stream(
                 chatId,
                 options.systemMessage(),
-                finalMessage,
+                userMessage,
+                messageAttachments,
                 options
             );
         }

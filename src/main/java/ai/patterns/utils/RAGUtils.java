@@ -61,11 +61,6 @@ public class RAGUtils
   // Format vector data to send to LLM as RAG data
   // return as List
   public static List<Map<String, Object>> augmentWithVectorDataList(String userMessage, ChatOptions options, CapitalDataAccessDAO dataAccess) {
-    // no RAG? ok
-    if (!options.enableRAG() || (options.chunkingType() == ChunkingType.NONE)) {
-      return new ArrayList<>();
-    }
-
     // search the vector store by query and embedding type !
     List<Map<String, Object>> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
 
@@ -77,49 +72,51 @@ public class RAGUtils
     return vectorData;
   }
 
-  // prepare UserMessage for LLM without appending sources
-  public static String prepareUserMessagesNoSources(String userMessage, String additionalVectorData){
-    return PromptTemplate.from("""
-        Here's the question from the user:
-        <question>
-        {{userMessage}}
-        </question>
-        
-        Answer the question using the following information:
-        <excerpts>
-        {{contents}}
-        </excerpts>
-        
-        """).apply(Map.of(
-        "userMessage", userMessage,
-        "contents", additionalVectorData
-    )).toUserMessage().singleText();
-  }
+  // prepare UserMessage for LLM with sources appended
+  public static String prepareUserMessage(String userMessage,
+                                                      String messageAttachments,
+                                                      String additionalVectorData,
+                                                      String sources,
+                                                      ChatOptions chatOptions){
+    String returnSources = sources;
+    if (chatOptions.showDataSources()) {
+      returnSources = String.format("""
+          Please add at the end of your answer, the following String as-is, for reference purposes:
+          ---------------------
+          ===== SOURCES =====
 
-  // prepare UserMessage for LLM with soruces appended
-  public static String prepareUserMessagesWithSources(String userMessage, String additionalVectorData, String sources){
+          %s
+
+          ---------------------
+          """, sources);
+    }
+
+    String vectorData = additionalVectorData;
+    if(additionalVectorData != null && ! additionalVectorData.isEmpty()) {
+      vectorData = String.format("""
+          Answer the question using the following information:
+          <excerpts>
+          %s
+          </excerpts>          
+          """, additionalVectorData);
+    }
+
     return PromptTemplate.from("""
         Here's the question from the user:
         <question>
         {{userMessage}}
         </question>
         
-        Answer the question using the following information:
-        <excerpts>
-        {{contents}}
-        </excerpts>
+        {{attachments}}
         
-        Please add at the end of your answer, the following String as-is, for reference purposes:
-        ---------------------
-        ===== SOURCES =====
+        {{contents}}
         
         {{sources}}
-        
-        ---------------------
         """).apply(Map.of(
         "userMessage", userMessage,
+        "attachments", messageAttachments,
         "contents", additionalVectorData,
-        "sources", sources
+        "sources", returnSources
     )).toUserMessage().singleText();
   }
 }
