@@ -10,6 +10,7 @@ import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
@@ -42,7 +43,7 @@ public class ChatService extends AbstractBase {
                     ChatOptions options) {
     ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
         .chatLanguageModel(getChatLanguageModel(options.model()))
-        .chatMemoryProvider(chatMemoryProvider)
+        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
         .build();
 
     String report = assistant.chat(chatId, systemMessage, userMessage);
@@ -60,7 +61,7 @@ public class ChatService extends AbstractBase {
                              ChatOptions options) {
     ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
-        .chatMemoryProvider(chatMemoryProvider)
+        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
         .build();
 
     // augment with vector data if RAG is enabled
