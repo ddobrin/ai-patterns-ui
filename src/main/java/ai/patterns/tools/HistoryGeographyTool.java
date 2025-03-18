@@ -53,7 +53,7 @@ public class HistoryGeographyTool extends AbstractBase {
     System.out.println(blue(">>> Invoking `searchInformation` tool with query: ") + query);
 
     TopicAssistant topicAssistant = AiServices.builder(TopicAssistant.class)
-        .streamingChatLanguageModel(getChatLanguageModelStreaming(MODEL_GEMINI_FLASH))
+        .chatLanguageModel(getChatLanguageModel(MODEL_GEMINI_FLASH))
         .build();
 
     // augment with vector data if RAG is enabled
@@ -84,9 +84,6 @@ public class HistoryGeographyTool extends AbstractBase {
 
     Result<String> reportResult = topicAssistant.report(finalUserMessage);
 
-    reportResult.sources().forEach(content -> {
-      System.out.println(cyan("- Source: ") + content.textSegment().text());
-    });
     System.out.println(yellow("\n-> Topic report: ") + reportResult.content().replaceAll("\\n", "\n"));
 
     return new TopicReport(query, reportResult.content());

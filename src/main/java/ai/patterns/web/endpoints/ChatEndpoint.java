@@ -113,22 +113,9 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         }
 
         // follow separate streams for chat, respectively agents
-        if (options.useAgents()) {
-            return agenticRAGService.stream(
-                chatId,
-                options.systemMessage(),
-                userMessage,
-                messageAttachments,
-                options);
-        } else {
-            return chatService.stream(
-                chatId,
-                options.systemMessage(),
-                userMessage,
-                messageAttachments,
-                options
-            );
-        }
+        return options.useAgents()
+            ? agenticRAGService.stream(chatId, options.systemMessage(), userMessage, messageAttachments, options)
+            : chatService.stream(chatId, options.systemMessage(), userMessage, messageAttachments, options);
     }
 
     @Override
