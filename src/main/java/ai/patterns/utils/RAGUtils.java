@@ -19,16 +19,23 @@ public class RAGUtils
     }
 
     return vectorData.stream()
+        .sorted((o1, o2) -> ((Double)o2.get("distance")).compareTo((Double)o1.get("distance")))
         .map(map -> {
           Double distance = (Double) map.get("distance");
           String content = (String) map.get("content");
           String chunk = (String) map.get("chunk");
 
           if (distance != null && content != null && chunk != null) {
-            if(chunk.length() > 200)
-              chunk = chunk.substring(0, 200);
+            if(chunk.length() > 400)
+              chunk = chunk.substring(0, 400);
 
-            return String.format("[Distance: %.10f]\n\n--> CONTENT: %s\nCHUNK: %s [...]",
+            return String.format("""
+                    * Similarity: **%.3f**
+                        * Embedded
+                            > %s
+                        * Context
+                            > %s
+                    """,
                 distance, content, chunk);
           } else {
             return "";
@@ -85,12 +92,11 @@ public class RAGUtils
     if (showDataSources) {
       returnSources = String.format("""
           Please add at the end of your answer, the following content as-is, for reference purposes:
-          ---------------------
-          ===== SOURCES =====
+
+          ### Sources
 
           %s
 
-          ---------------------
           """, sources);
     }
 
