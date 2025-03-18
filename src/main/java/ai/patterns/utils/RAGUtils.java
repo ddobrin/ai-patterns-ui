@@ -27,7 +27,7 @@ public class RAGUtils
 
           if (distance != null && content != null && chunk != null) {
             if(chunk.length() > 400)
-              chunk = chunk.substring(0, 400);
+              chunk = chunk.substring(0, 400) + " [...]";
 
             return String.format("""
                     * Similarity: **%.3f**
