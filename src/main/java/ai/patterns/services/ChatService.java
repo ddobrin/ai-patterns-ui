@@ -27,7 +27,6 @@ import reactor.core.publisher.Flux;
 @Service
 public class ChatService extends AbstractBase {
 
-  // with multiple models, AI framework starters are not yet configured for supporting multiple models
   private final ChatMemoryProvider chatMemoryProvider;
   private final CapitalDataAccessDAO dataAccess;
 
@@ -69,8 +68,11 @@ public class ChatService extends AbstractBase {
     List<Map<String, Object>> vectorDataList = new ArrayList<>();
     String additionalVectorData = "";
     String sources = "";
+
     if (options.enableRAG()) {
-      vectorDataList = augmentWithVectorDataList(userMessage, options, dataAccess);
+      vectorDataList = augmentWithVectorDataList(userMessage,
+                                                 options.chunkingType().name().toLowerCase(),
+                                                 dataAccess);
 
       // format RAG data to send to LLM
       additionalVectorData = vectorDataList.stream()
@@ -85,7 +87,11 @@ public class ChatService extends AbstractBase {
     }
 
     //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)
-    String finalUserMessage = prepareUserMessage(userMessage, messageAttachments, additionalVectorData, sources, options);
+    String finalUserMessage = prepareUserMessage(userMessage,
+        messageAttachments,
+        additionalVectorData,
+        sources,
+        options.showDataSources());
 
     return assistant.stream(chatId, systemMessage, finalUserMessage)
         .doOnNext(System.out::print)

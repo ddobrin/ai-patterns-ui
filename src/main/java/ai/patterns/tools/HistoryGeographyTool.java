@@ -6,9 +6,15 @@ import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.yellow;
 import static ai.patterns.utils.Models.MODEL_EMBEDDING_TEXT;
 import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
+import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
+import static ai.patterns.utils.RAGUtils.formatVectorData;
+import static ai.patterns.utils.RAGUtils.prepareUserMessage;
 
 import ai.patterns.base.AbstractBase;
+import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.data.TopicReport;
+import ai.patterns.services.ChatService;
+import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.input.PromptTemplate;
@@ -18,7 +24,10 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +35,12 @@ import org.springframework.stereotype.Component;
 public class HistoryGeographyTool extends AbstractBase {
 
   private EmbeddingStore<TextSegment> embeddingStore;
+  private final CapitalDataAccessDAO dataAccess;
 
-  public HistoryGeographyTool(EmbeddingStore<TextSegment> embeddingStore){
+  public HistoryGeographyTool(EmbeddingStore<TextSegment> embeddingStore,
+                              CapitalDataAccessDAO dataAccess){
     this.embeddingStore = embeddingStore;
+    this.dataAccess = dataAccess;
   }
 
   interface TopicAssistant {
@@ -41,42 +53,36 @@ public class HistoryGeographyTool extends AbstractBase {
     System.out.println(blue(">>> Invoking `searchInformation` tool with query: ") + query);
 
     TopicAssistant topicAssistant = AiServices.builder(TopicAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(MODEL_GEMINI_FLASH))
-        .retrievalAugmentor(DefaultRetrievalAugmentor.builder()
-            .contentRetriever(EmbeddingStoreContentRetriever.builder()
-                .embeddingModel(getEmbeddingModel(MODEL_EMBEDDING_TEXT))
-                .embeddingStore(embeddingStore)
-                .maxResults(3)
-                .minScore(0.75)
-                .build())
-        .contentInjector((contents, userMessage) -> {
-          String excerpts = contents.stream()
-              .map(content ->
-                  content
-                      .textSegment()
-                      .metadata()
-                      .getString(PARAGRAPH_METADATA_KEY))
-              .collect(Collectors.joining("\n\n"));
+        .streamingChatLanguageModel(getChatLanguageModelStreaming(MODEL_GEMINI_FLASH))
+        .build();
 
-          return PromptTemplate.from("""
-                        Here's the question from the user:
-                        <question>
-                        {{userMessage}}
-                        </question>
-                        
-                        Answer the question using the following information:
-                        <excerpts>
-                        {{contents}}
-                        </excerpts>
-                        """).apply(Map.of(
-              "userMessage", query,
-              "contents", excerpts
-          )).toUserMessage();
-        })
-        .build())
-            .build();
+    // augment with vector data if RAG is enabled
+    // no RAG? ok
+    List<Map<String, Object>> vectorDataList = new ArrayList<>();
+    String additionalVectorData = "";
+    String sources = "";
 
-    Result<String> reportResult = topicAssistant.report(query);
+    vectorDataList = augmentWithVectorDataList(query, ChunkingType.HYPOTHETICAL.name().toLowerCase(), dataAccess);
+
+    // format RAG data to send to LLM
+    additionalVectorData = vectorDataList.stream()
+        .map(map -> Optional.ofNullable(map.get("chunk")))
+        .filter(Optional::isPresent) //filter out optionals that are empty
+        .map(Optional::get) //get the value from the optional.
+        .map(Object::toString) //convert each object to string.
+        .collect(Collectors.joining("\n"));
+
+    // format sources in returnable format
+    sources = formatVectorData(vectorDataList);
+
+    //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)
+    String finalUserMessage = prepareUserMessage(query,
+                            "",
+                                                additionalVectorData,
+                                                sources,
+                                false);
+
+    Result<String> reportResult = topicAssistant.report(finalUserMessage);
 
     reportResult.sources().forEach(content -> {
       System.out.println(cyan("- Source: ") + content.textSegment().text());

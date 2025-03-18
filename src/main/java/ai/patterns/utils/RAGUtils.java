@@ -25,8 +25,11 @@ public class RAGUtils
           String chunk = (String) map.get("chunk");
 
           if (distance != null && content != null && chunk != null) {
+            if(chunk.length() > 200)
+              chunk = chunk.substring(0, 200);
+
             return String.format("[Distance: %.10f]\n\n--> CONTENT: %s\nCHUNK: %s [...]",
-                distance, content, chunk.substring(0, 200));
+                distance, content, chunk);
           } else {
             return "";
           }
@@ -60,9 +63,9 @@ public class RAGUtils
 
   // Format vector data to send to LLM as RAG data
   // return as List
-  public static List<Map<String, Object>> augmentWithVectorDataList(String userMessage, ChatOptions options, CapitalDataAccessDAO dataAccess) {
+  public static List<Map<String, Object>> augmentWithVectorDataList(String userMessage, String embedType, CapitalDataAccessDAO dataAccess) {
     // search the vector store by query and embedding type !
-    List<Map<String, Object>> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
+    List<Map<String, Object>> vectorData = dataAccess.searchEmbeddings(userMessage, embedType);
 
     if (vectorData == null || vectorData.isEmpty()) {
       System.out.println("Vector data is empty or null.");
@@ -77,11 +80,11 @@ public class RAGUtils
                                                       String messageAttachments,
                                                       String additionalVectorData,
                                                       String sources,
-                                                      ChatOptions chatOptions){
+                                                      boolean showDataSources){
     String returnSources = sources;
-    if (chatOptions.showDataSources()) {
+    if (showDataSources) {
       returnSources = String.format("""
-          Please add at the end of your answer, the following String as-is, for reference purposes:
+          Please add at the end of your answer, the following content as-is, for reference purposes:
           ---------------------
           ===== SOURCES =====
 
