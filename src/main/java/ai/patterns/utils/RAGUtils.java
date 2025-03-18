@@ -88,7 +88,7 @@ public class RAGUtils
                                                       String additionalVectorData,
                                                       String sources,
                                                       boolean showDataSources){
-    String returnSources = sources;
+    String returnSources = "";
     if (showDataSources) {
       returnSources = String.format("""
           Please add at the end of your answer, the following content as-is, for reference purposes:
@@ -124,7 +124,7 @@ public class RAGUtils
         """).apply(Map.of(
         "userMessage", userMessage,
         "attachments", messageAttachments,
-        "contents", additionalVectorData,
+        "contents", vectorData,
         "sources", returnSources
     )).toUserMessage().singleText();
   }

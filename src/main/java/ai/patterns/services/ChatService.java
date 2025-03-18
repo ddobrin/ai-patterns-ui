@@ -21,30 +21,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 @Service
 public class ChatService extends AbstractBase {
 
-  private final ChatMemoryProvider chatMemoryProvider;
   private final CapitalDataAccessDAO dataAccess;
+  private static ChatAssistant assistant = null;
 
-  public ChatService(ChatMemoryProvider chatMemoryProvider,
-                     CapitalDataAccessDAO dataAccess) {
-    this.chatMemoryProvider = chatMemoryProvider;
+  public ChatService(CapitalDataAccessDAO dataAccess) {
     this.dataAccess = dataAccess;
   }
 
   public String chat(String chatId,
                     String systemMessage,
                     String userMessage,
+                    String messageAttachments,
                     ChatOptions options) {
-    ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(options.model()))
-        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-        .build();
+    if(assistant == null) {
+      assistant = AiServices.builder(ChatService.ChatAssistant.class)
+          .chatLanguageModel(getChatLanguageModel(options.model()))
+          .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
+          .build();
+    }
 
     String report = assistant.chat(chatId, systemMessage, userMessage);
 
@@ -59,10 +59,12 @@ public class ChatService extends AbstractBase {
                              String userMessage,
                              String messageAttachments,
                              ChatOptions options) {
-    ChatService.ChatAssistant assistant = AiServices.builder(ChatService.ChatAssistant.class)
-        .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
-        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-        .build();
+    if(assistant == null) {
+      assistant = AiServices.builder(ChatService.ChatAssistant.class)
+          .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
+          .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
+          .build();
+    }
 
     // augment with vector data if RAG is enabled
     // no RAG? ok
