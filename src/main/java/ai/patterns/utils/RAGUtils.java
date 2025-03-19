@@ -1,9 +1,16 @@
 package ai.patterns.utils;
 
+import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
+
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.PromptTemplate;
+import dev.langchain4j.rag.query.Metadata;
+import dev.langchain4j.rag.query.Query;
+import dev.langchain4j.rag.query.transformer.CompressingQueryTransformer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,4 +135,20 @@ public class RAGUtils
         "sources", returnSources
     )).toUserMessage().singleText();
   }
+
+  public static String compressQuery(String chatId, String userMessage, MessageWindowChatMemory chatMemory, ChatLanguageModel chatLanguageModel) {
+    CompressingQueryTransformer transformer = new CompressingQueryTransformer(chatLanguageModel);
+
+    Query firstQuery = transformer.transform(new Query(userMessage,
+            new Metadata(dev.langchain4j.data.message.UserMessage.from(userMessage),
+                chatId,
+                chatMemory.messages())))
+        .stream()
+        .findFirst()
+        .orElse(new Query(userMessage));
+
+    userMessage = firstQuery.text();
+    return userMessage;
+  }
+
 }

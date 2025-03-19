@@ -3,13 +3,14 @@ package ai.patterns.services;
 import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.blue;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
+import static ai.patterns.utils.RAGUtils.compressQuery;
 import static ai.patterns.utils.RAGUtils.formatVectorData;
 import static ai.patterns.utils.RAGUtils.prepareUserMessage;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
-import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import ai.patterns.web.endpoints.ChatEndpoint.RetrievalType;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -28,7 +30,11 @@ import reactor.core.publisher.Flux;
 public class ChatService extends AbstractBase {
 
   private final CapitalDataAccessDAO dataAccess;
-  private static ChatAssistant assistant = null;
+  private ChatAssistant assistant = null;
+  private final Map<String, MessageWindowChatMemory> chatMemories = new ConcurrentHashMap<>();
+
+  // Create a chat memory instance for this specific chatId
+  MessageWindowChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
 
   public ChatService(CapitalDataAccessDAO dataAccess) {
     this.dataAccess = dataAccess;
@@ -59,11 +65,28 @@ public class ChatService extends AbstractBase {
                              String userMessage,
                              String messageAttachments,
                              ChatOptions options) {
+    // Get or create chat memory for this specific chatId
+    MessageWindowChatMemory chatMemory = chatMemories.computeIfAbsent(chatId,
+        id -> MessageWindowChatMemory.withMaxMessages(10));
+
+    // Add system message if provided and memory is empty
+    if (systemMessage != null && !systemMessage.isEmpty() && chatMemory.messages().isEmpty()) {
+      chatMemory.add(dev.langchain4j.data.message.SystemMessage.from(systemMessage));
+    }
+
+    // create an AI Assistant only once
     if(assistant == null) {
       assistant = AiServices.builder(ChatService.ChatAssistant.class)
           .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
-          .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
+          .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
+                    memoryId,
+                    MessageWindowChatMemory.withMaxMessages(10)))
           .build();
+    }
+
+    // compress the query if required
+    if(options.retrievalType() == RetrievalType.QUERY_COMPRESSION){
+      userMessage = compressQuery(chatId, userMessage, chatMemory, getChatLanguageModel(options.model()));
     }
 
     // augment with vector data if RAG is enabled
