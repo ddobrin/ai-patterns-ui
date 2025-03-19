@@ -23,6 +23,8 @@ export GCP_PROJECT_ID=<project>>
 export GCP_LOCATION=us-central1 
 export ASTRA_TOKEN=AstraCS:...
 export ALLOY_DB_PASSWORD=...
+export ALLOY_DB_URL=jdbc:postgresql://localhost:5432/library;
+export ALLOY_DB_USERNAME=postgres
 ```
 
 Deploy to Cloud Run
