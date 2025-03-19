@@ -1,5 +1,5 @@
 import {nanoid} from "nanoid";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import { Chat } from '@vaadin/flow-frontend/chat/Chat.js';
 import {ChatEndpoint} from "Frontend/generated/endpoints";
 import ChatOptions from "Frontend/generated/ai/patterns/web/endpoints/ChatEndpoint/ChatOptions";
@@ -59,15 +59,37 @@ export default function AiPatterns() {
     read(defaultOptions)
   }, []);
 
+  useEffect(() => {
+    const chat = document.querySelector('vaadin-scroller');
+
+    const handleClick = (event: Event) => { // Change the type to Event
+      console.log("clicked");
+
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'H4') {
+        target.classList.toggle('expanded');
+      }
+    };
+
+    if (chat) {
+      chat.addEventListener('click', handleClick);
+    }
+
+    return () => {
+      if (chat) {
+        chat.removeEventListener('click', handleClick);
+      }
+    };
+  }, []);
+
   async function resetChat() {
     setChatId(nanoid());
   }
 
-
   return (
     <div className="ai-patterns-ui">
       <header>
-        <h1>World Capitals</h1>
+        <h1>🌐 World Capitals</h1>
 
         <Button onClick={resetChat} theme="icon small contrast tertiary">
           <Icon icon="lumo:reload" />
@@ -118,8 +140,8 @@ export default function AiPatterns() {
           <div className="space"></div>
           <div className="built-with">UI built in Java with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         </div>
-        <Chat 
-          chatId={chatId} 
+        <Chat
+          chatId={chatId}
           service={ChatEndpoint} 
           options={value} 
           acceptedFiles=".txt, .md"/>

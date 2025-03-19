@@ -22,7 +22,7 @@ public class RAGUtils
   // Format vector data as a String to return as SOURCES to the UI
   public static String formatVectorData(List<Map<String, Object>> vectorData) {
     if (vectorData == null || vectorData.isEmpty()) {
-      return "Vector data is empty or null.";
+      return "No sources found (no data matching your query in the vector store).";
     }
 
     return vectorData.stream()
@@ -33,8 +33,8 @@ public class RAGUtils
           String chunk = (String) map.get("chunk");
 
           if (distance != null && content != null && chunk != null) {
-            if(chunk.length() > 400)
-              chunk = chunk.substring(0, 400) + " [...]";
+//            if(chunk.length() > 500)
+//              chunk = chunk.substring(0, 500) + " [...]";
 
             return String.format("""
                     * Similarity: **%.3f**
@@ -96,11 +96,11 @@ public class RAGUtils
                                                       String sources,
                                                       boolean showDataSources){
     String returnSources = "";
-    if (showDataSources) {
-      returnSources = String.format("""
+    if (showDataSources && !sources.trim().isEmpty()) {
+        returnSources = String.format("""
           Please add at the end of your answer, the following content as-is, for reference purposes:
 
-          ### Sources
+          #### Sources
 
           %s
 

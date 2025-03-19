@@ -25,7 +25,9 @@
 
         blockquote {
             margin-left: 0.5em;
-            padding-left: 0.5em;
+            padding: 0.1em 0.1em 0.1em 0.5em;
+            background-color: var(--lumo-primary-color-10pct);
+            font-style: italic;
         }
 
         .settings {
@@ -71,6 +73,38 @@
             min-height: 0;
             height: 100%;
             overflow: hidden;
+
+            .hidden {
+                display: none;
+            }
+
+            h4 {
+                cursor: pointer;
+                user-select: none;
+            }
+
+            h4::after {
+                content: " ⏶";
+            }
+
+            h4.expanded::after  {
+                content: " ⏷";
+            }
+
+            /* Initially hide all ul elements that are next to an h4 */
+            h4 + ul {
+                display: none;
+            }
+
+            /* When the h3 is clicked, show the next ul */
+            h4.expanded + ul {
+                display: block;
+            }
+
+            .scroller {
+                overflow-y: auto;
+                max-height: 500px;
+            }
         }
     }
 }
