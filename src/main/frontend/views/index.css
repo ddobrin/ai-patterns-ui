@@ -28,6 +28,8 @@
             padding-left: 0.5em;
         }
 
+
+
         .settings {
             width: 470px;
             display: flex;
@@ -71,6 +73,38 @@
             min-height: 0;
             height: 100%;
             overflow: hidden;
+
+            .hidden {
+                display: none;
+            }
+
+            h3 {
+                cursor: pointer;
+                user-select: none;
+            }
+
+            h3::after {
+                content: " ⏶";
+            }
+
+            h3.expanded::after  {
+                content: " ⏷";
+            }
+
+            /* Initially hide all ul elements that are next to an h3 */
+            h3 + ul {
+                display: none;
+            }
+
+            /* When the h3 is clicked, show the next ul */
+            h3.expanded + ul {
+                display: block;
+            }
+
+            .scroller {
+                overflow-y: auto;
+                max-height: 500px;
+            }
         }
     }
 }
