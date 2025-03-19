@@ -25,10 +25,10 @@
 
         blockquote {
             margin-left: 0.5em;
-            padding-left: 0.5em;
+            padding: 0.1em 0.1em 0.1em 0.5em;
+            background-color: var(--lumo-primary-color-10pct);
+            font-style: italic;
         }
-
-
 
         .settings {
             width: 470px;
@@ -78,26 +78,26 @@
                 display: none;
             }
 
-            h3 {
+            h4 {
                 cursor: pointer;
                 user-select: none;
             }
 
-            h3::after {
+            h4::after {
                 content: " ⏶";
             }
 
-            h3.expanded::after  {
+            h4.expanded::after  {
                 content: " ⏷";
             }
 
-            /* Initially hide all ul elements that are next to an h3 */
-            h3 + ul {
+            /* Initially hide all ul elements that are next to an h4 */
+            h4 + ul {
                 display: none;
             }
 
             /* When the h3 is clicked, show the next ul */
-            h3.expanded + ul {
+            h4.expanded + ul {
                 display: block;
             }
 

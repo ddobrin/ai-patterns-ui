@@ -66,11 +66,7 @@ export default function AiPatterns() {
       console.log("clicked");
 
       const target = event.target as HTMLElement;
-      if (target.tagName === 'H3') {
-        // Check if the h3 is inside the settings panel
-        if (target.closest('.settings')) {
-          return; // Ignore clicks on h3 inside the settings panel
-        }
+      if (target.tagName === 'H4') {
         target.classList.toggle('expanded');
       }
     };
