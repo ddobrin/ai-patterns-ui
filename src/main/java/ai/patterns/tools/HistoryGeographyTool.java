@@ -1,10 +1,7 @@
 package ai.patterns.tools;
 
-import static ai.patterns.config.Config.PARAGRAPH_METADATA_KEY;
 import static ai.patterns.utils.Ansi.blue;
-import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.yellow;
-import static ai.patterns.utils.Models.MODEL_EMBEDDING_TEXT;
 import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
 import static ai.patterns.utils.RAGUtils.formatVectorData;
@@ -13,17 +10,11 @@ import static ai.patterns.utils.RAGUtils.prepareUserMessage;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.data.TopicReport;
-import ai.patterns.services.ChatService;
 import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.rag.DefaultRetrievalAugmentor;
-import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.SystemMessage;
-import dev.langchain4j.store.embedding.EmbeddingStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +25,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class HistoryGeographyTool extends AbstractBase {
 
-  private EmbeddingStore<TextSegment> embeddingStore;
   private final CapitalDataAccessDAO dataAccess;
 
-  public HistoryGeographyTool(EmbeddingStore<TextSegment> embeddingStore,
-                              CapitalDataAccessDAO dataAccess){
-    this.embeddingStore = embeddingStore;
+  public HistoryGeographyTool(CapitalDataAccessDAO dataAccess){
     this.dataAccess = dataAccess;
   }
 

@@ -1,14 +1,9 @@
 package ai.patterns.base;
 
 import static ai.patterns.utils.Models.MODEL_EMBEDDING_TEXT;
-import static com.datastax.astra.client.model.SimilarityMetric.COSINE;
 import static ai.patterns.utils.Ansi.cyan;
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.DataAPIClient;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
@@ -89,29 +84,6 @@ public abstract class AbstractBase {
                 .maxSegmentsPerBatch(100)
                 .maxRetries(5)
                 .build();
-    }
-
-    // ------------------------------------------------------------
-    //                ASTRA / CASSANDRA STORE STUFF
-    // ------------------------------------------------------------
-
-    public static final String ASTRA_TOKEN        = System.getenv("ASTRA_TOKEN");
-    public static final String ASTRA_API_ENDPOINT = "https://1839c746-6788-481d-8413-7b7d49fa9ea3-us-east1.apps.astra.datastax.com";
-
-    public Database getAstraDatabase() {
-        // verbose
-        //return new DataAPIClient(ASTRA_TOKEN).getDatabase(ASTRA_API_ENDPOINT);
-        return new DataAPIClient(ASTRA_TOKEN)
-                //DataAPIOptions.builder().withObserver(new LoggingCommandObserver(AbstractBase.class)).build())
-                .getDatabase(ASTRA_API_ENDPOINT);
-    }
-
-    public Collection<Document> createCollection(String name, int dimension) {
-        return getAstraDatabase().createCollection(name, dimension, COSINE);
-    }
-
-    public Collection<Document> getCollection(String name) {
-        return getAstraDatabase().getCollection(name);
     }
 
     // ------------------------------------------------------------

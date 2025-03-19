@@ -169,13 +169,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- ASTRA/CASSANDRA -->
-		<dependency>
-			<groupId>com.datastax.astra</groupId>
-			<artifactId>langchain4j-astradb</artifactId>
-			<version>${astra-db-java.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-cohere</artifactId>
