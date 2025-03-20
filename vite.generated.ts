@@ -142,7 +142,6 @@ function buildSWPlugin(opts: { devMode: boolean }): PluginOption {
           sourcemap: viteConfig.command === 'serve' || viteConfig.build.sourcemap,
           emptyOutDir: false,
           modulePreload: false,
-          target: ['safari15', 'es2022'],
           rollupOptions: {
             input: {
               sw: settings.clientServiceWorkerSource
@@ -698,7 +697,6 @@ export const vaadinConfig: UserConfigFn = (env) => {
       outDir: buildOutputFolder,
       emptyOutDir: devBundle,
       assetsDir: 'VAADIN/build',
-      target: ['safari15', 'es2022'],
       rollupOptions: {
         input: {
           indexhtml: projectIndexHtml,

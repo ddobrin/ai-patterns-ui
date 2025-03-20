@@ -21,6 +21,7 @@ Env. variables: uses AstraDB, I will paste a key in the Git repo, under /Discuss
 ```shell
 export GCP_PROJECT_ID=<project>>
 export GCP_LOCATION=us-central1 
+export ASTRA_TOKEN=AstraCS:...
 export ALLOY_DB_PASSWORD=...
 export ALLOY_DB_URL=jdbc:postgresql://localhost:5432/library;
 export ALLOY_DB_USERNAME=postgres
@@ -41,9 +42,6 @@ gcloud run deploy agentic-rag --image us-central1-docker.pkg.dev/genai-playgroun
 gcloud run deploy agentic-rag --image us-central1-docker.pkg.dev/genai-playground24/agentic-rag/agentic-rag:latest  --region us-central1 --set-env-vars=SERVER_PORT=8080    --memory 2Gi --cpu 2 --cpu-boost --execution-environment=gen1 --set-env-vars=GCP_PROJECT_ID=genai-playground24 --set-env-vars=GCP_LOCATION=us-central1 
  --set-env-vars=ASTRA_TOKEN=sm://genai-playground24/ASTRA_TOKEN/latest
 ```
-
-
-
 
 # -------------
 3 sections:
