@@ -118,15 +118,16 @@ public class ChatService extends AbstractBase {
             .map(capitalChunk ->
                 new TextSegment(
                     capitalChunk.getContent(),
-                    new Metadata(Map.of("id", capitalChunk.getChunkId()
-                    ))))
-            .peek(capitalChunk -> System.out.println(green(capitalChunk.text())))
+                    new Metadata(Map.of("id", capitalChunk.getChunkId()))
+                )
+            )
             .toList();
 
         Response<List<Double>> scoredCapitalChunks = scoringModel.scoreAll(contents, userMessage);
 
         for (int i = 0; i < scoredCapitalChunks.content().size(); i++) {
           capitalChunks.get(i).setRerankingScore(scoredCapitalChunks.content().get(i));
+          System.out.println("- " + capitalChunks.get(i).getRerankingScore() + " — " + cyan(capitalChunks.get(i).getContent()));
         }
 
         // Keep only chunks with a reranking score above 0.6
