@@ -152,13 +152,11 @@ public class RAGUtils {
   }
 
   public static String hypotheticalAnswer(String chatId, String userMessage, MessageWindowChatMemory chatMemory, ChatLanguageModel chatLanguageModel) {
-    String compressedQuery = compressQuery(chatId, userMessage, chatMemory, chatLanguageModel);
-
       return chatLanguageModel.chat("""
           Answer the following user question.
           Don't use pronouns, be explicit about the subject and object of the question and answer.
           
           Question: %s
-          """.formatted(compressedQuery));
+          """.formatted(userMessage));
   }
 }

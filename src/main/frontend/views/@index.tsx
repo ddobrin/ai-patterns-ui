@@ -45,7 +45,11 @@ const defaultOptions: ChatOptions = {
   useGuardrails: false,
   evaluateResponse: false,
   chunkingType: ChunkingType.NONE,
-  retrievalType: RetrievalType.NONE,
+  filtering: false,
+  queryCompression: false,
+  queryRouting: false,
+  hyde: false,
+  reranking: false,
   writeActions: false,
   showDataSources: true
 };
@@ -110,14 +114,13 @@ export default function AiPatterns() {
             <RadioButton value={ChunkingType.LATE} label="Late Chunking" />
           </RadioGroup>
           <h3>Retrieval Methods</h3>
-          <RadioGroup theme={"vertical"} {...field(model.retrievalType)}>
-            <RadioButton value={ChunkingType.NONE} label="None" />
-            <RadioButton value={RetrievalType.FILTERING} label="Filtering" />
-            <RadioButton value={RetrievalType.QUERY_COMPRESSION} label="Query Compression" />
-            <RadioButton value={RetrievalType.QUERY_ROUTING} label="Query Routing" />
-            <RadioButton value={RetrievalType.HYDE} label="Hypothetical Document Embedding" />
-            <RadioButton value={RetrievalType.RERANKING} label="Reranking" />
-          </RadioGroup>
+          <div className="vertical-checkboxes">
+            <Checkbox label="Filtering" {...field(model.filtering) } />
+            <Checkbox label="Query compression" {...field(model.queryCompression) } />
+            <Checkbox label="Query routing" {...field(model.queryRouting) } />
+            <Checkbox label="HYpothetical Document Embedding" {...field(model.hyde) } />
+            <Checkbox label="Reranking" {...field(model.reranking) } />
+          </div>
           <h3>Settings</h3>
           <Checkbox label="Use Vertex" {...field(model.useVertex)} />
           <h3>Capabilities</h3>

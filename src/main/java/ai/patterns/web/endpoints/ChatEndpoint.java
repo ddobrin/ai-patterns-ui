@@ -41,15 +41,6 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         LATE
     }
 
-    public enum RetrievalType {
-        NONE,
-        FILTERING,
-        QUERY_COMPRESSION,
-        QUERY_ROUTING,
-        HYDE,
-        RERANKING,
-    }
-
     public record ChatOptions(
         String systemMessage,
         boolean useVertex,
@@ -61,7 +52,11 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         boolean evaluateResponse,
         boolean enableRAG,
         ChunkingType chunkingType,
-        RetrievalType retrievalType,
+        boolean filtering,
+        boolean queryCompression,
+        boolean queryRouting,
+        boolean hyde,
+        boolean reranking,
         boolean writeActions,
         boolean showDataSources) {
     }
@@ -88,7 +83,11 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                 false,
                 false,
                  ChunkingType.NONE,
-                 RetrievalType.NONE,
+                 false,
+                 false,
+                 false,
+                 false,
+                 false,
                 false,
                  true);
         }
