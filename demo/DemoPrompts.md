@@ -24,6 +24,13 @@ Think step by step:
 4) Collect all those answers together, and create the final report.  
 ```
 
+Hypothetical Document Embedding
+```
+What's the capital of Germany?
+
+How many people live there?
+```
+
 Planning UserMessage
 ```
 Write a report about the population of Berlin, its geographic situation, its historical origins. Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.

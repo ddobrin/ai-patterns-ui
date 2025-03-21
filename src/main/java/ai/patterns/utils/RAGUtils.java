@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class RAGUtils
-{
+public class RAGUtils {
+
   // Format vector data as a String to return as SOURCES to the UI
   public static String formatVectorData(List<Map<String, Object>> vectorData) {
     if (vectorData == null || vectorData.isEmpty()) {
@@ -113,7 +113,7 @@ public class RAGUtils
           Answer the question using the following information:
           <excerpts>
           %s
-          </excerpts>          
+          </excerpts>
           """, additionalVectorData);
     }
 
@@ -151,4 +151,14 @@ public class RAGUtils
     return userMessage;
   }
 
+  public static String hypotheticalAnswer(String chatId, String userMessage, MessageWindowChatMemory chatMemory, ChatLanguageModel chatLanguageModel) {
+    String compressedQuery = compressQuery(chatId, userMessage, chatMemory, chatLanguageModel);
+
+      return chatLanguageModel.chat("""
+          Answer the following user question.
+          Don't use pronouns, be explicit about the subject and object of the question and answer.
+          
+          Question: %s
+          """.formatted(compressedQuery));
+  }
 }
