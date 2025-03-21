@@ -20,8 +20,8 @@ AIPatternsWebApplication
 Env. variables: uses AstraDB, I will paste a key in the Git repo, under /Discussions - it is a private repo and the Astra account is free
 ```shell
 export GCP_PROJECT_ID=<project>>
+export GCP_PROJECT_NUM=<project_number>
 export GCP_LOCATION=us-central1 
-export ASTRA_TOKEN=AstraCS:...
 export ALLOY_DB_PASSWORD=...
 export ALLOY_DB_URL=jdbc:postgresql://localhost:5432/library;
 export ALLOY_DB_USERNAME=postgres

@@ -1,12 +1,17 @@
 package ai.patterns.services;
 
 import static ai.patterns.utils.Ansi.*;
+import static ai.patterns.utils.Models.RERANKING_SCORE_THRESHOLD;
 import static ai.patterns.utils.RAGUtils.*;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
+import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.scoring.ScoringModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
@@ -15,7 +20,6 @@ import dev.langchain4j.service.V;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -96,26 +100,48 @@ public class ChatService extends AbstractBase {
 
     // augment with vector data if RAG is enabled
     // no RAG? ok
-    List<Map<String, Object>> vectorDataList = new ArrayList<>();
+    List<CapitalDataAccessDAO.CapitalChunkRow> capitalChunks = new ArrayList<>();
     String additionalVectorData = "";
     String sources = "";
 
     if (options.enableRAG()) {
-      vectorDataList = augmentWithVectorDataList(userMessage,
+      capitalChunks = augmentWithVectorDataList(userMessage,
                                                  options.chunkingType().name().toLowerCase(),
                                                  dataAccess);
 
+      if (options.reranking()) {
+        System.out.println("\n" + blue(">>> RERANKING\n"));
+
+        ScoringModel scoringModel = getScoringModel();
+
+        List<TextSegment> contents = capitalChunks.stream()
+            .map(capitalChunk ->
+                new TextSegment(
+                    capitalChunk.getContent(),
+                    new Metadata(Map.of("id", capitalChunk.getChunkId()
+                    ))))
+            .peek(capitalChunk -> System.out.println(green(capitalChunk.text())))
+            .toList();
+
+        Response<List<Double>> scoredCapitalChunks = scoringModel.scoreAll(contents, userMessage);
+
+        for (int i = 0; i < scoredCapitalChunks.content().size(); i++) {
+          capitalChunks.get(i).setRerankingScore(scoredCapitalChunks.content().get(i));
+        }
+
+        // Keep only chunks with a reranking score above 0.6
+        capitalChunks = capitalChunks.stream()
+            .filter(capitalChunkRow -> capitalChunkRow.getRerankingScore() > RERANKING_SCORE_THRESHOLD)
+            .toList();
+      }
+
       // format RAG data to send to LLM
-      additionalVectorData = vectorDataList.stream()
-//          .peek(stringObjectMap -> System.out.println(red(stringObjectMap.toString()) + "\n\n"))
-          .map(map -> Optional.ofNullable(map.get("chunk")))
-          .filter(Optional::isPresent) //filter out optionals that are empty
-          .map(Optional::get) //get the value from the optional.
-          .map(Object::toString) //convert each object to string.
+      additionalVectorData = capitalChunks.stream()
+          .map(CapitalDataAccessDAO.CapitalChunkRow::getChunk)
           .collect(Collectors.joining("\n"));
 
       // format sources in returnable format
-      sources = formatVectorData(vectorDataList);
+      sources = formatSearchResults(capitalChunks);
     }
 
     //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)

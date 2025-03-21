@@ -1,7 +1,5 @@
 package ai.patterns.utils;
 
-import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
-
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
@@ -14,36 +12,31 @@ import dev.langchain4j.rag.query.transformer.CompressingQueryTransformer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RAGUtils {
 
   // Format vector data as a String to return as SOURCES to the UI
-  public static String formatVectorData(List<Map<String, Object>> vectorData) {
+  public static String formatSearchResults(List<CapitalDataAccessDAO.CapitalChunkRow> vectorData) {
     if (vectorData == null || vectorData.isEmpty()) {
       return "No sources found (no data matching your query in the vector store).";
     }
 
     return vectorData.stream()
-        .sorted((o1, o2) -> ((Double)o2.get("distance")).compareTo((Double)o1.get("distance")))
-        .map(map -> {
-          Double distance = (Double) map.get("distance");
-          String content = (String) map.get("content");
-          String chunk = (String) map.get("chunk");
-
-          if (distance != null && content != null && chunk != null) {
-//            if(chunk.length() > 500)
-//              chunk = chunk.substring(0, 500) + " [...]";
-
+        .sorted((o1, o2) -> o2.getDistance() > o1.getDistance() ? 1 : -1)
+        .map(capitalChunk -> {
+          if (capitalChunk.getDistance() != null && capitalChunk.getContent() != null && capitalChunk.getChunk() != null) {
             return String.format("""
-                    * Similarity: **%.3f**
+                    * Similarity: **%.3f** %s
                         * Embedded
                             > %s
                         * Context
                             > %s
                     """,
-                distance, content, chunk);
+                capitalChunk.getDistance(),
+                capitalChunk.getRerankingScore() != null ? " — _(Reranking score: %.3f)_".formatted(capitalChunk.getRerankingScore()) : "",
+                capitalChunk.getContent(),
+                capitalChunk.getChunk());
           } else {
             return "";
           }
@@ -60,7 +53,7 @@ public class RAGUtils {
     }
 
     // search the vector store by query and embedding type !
-    List<Map<String, Object>> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
+    List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
 
     if (vectorData == null || vectorData.isEmpty()) {
       System.out.println("Vector data is empty or null.");
@@ -68,18 +61,15 @@ public class RAGUtils {
     }
 
     return vectorData.stream()
-        .map(map -> Optional.ofNullable(map.get("chunk")))
-        .filter(Optional::isPresent) //filter out optionals that are empty
-        .map(Optional::get) //get the value from the optional.
-        .map(Object::toString) //convert each object to string.
+        .map(CapitalDataAccessDAO.CapitalChunkRow::getChunk)
         .collect(Collectors.joining("\n"));
   }
 
   // Format vector data to send to LLM as RAG data
   // return as List
-  public static List<Map<String, Object>> augmentWithVectorDataList(String userMessage, String embedType, CapitalDataAccessDAO dataAccess) {
+  public static List<CapitalDataAccessDAO.CapitalChunkRow> augmentWithVectorDataList(String userMessage, String embedType, CapitalDataAccessDAO dataAccess) {
     // search the vector store by query and embedding type !
-    List<Map<String, Object>> vectorData = dataAccess.searchEmbeddings(userMessage, embedType);
+    List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(userMessage, embedType);
 
     if (vectorData == null || vectorData.isEmpty()) {
       System.out.println("Vector data is empty or null.");

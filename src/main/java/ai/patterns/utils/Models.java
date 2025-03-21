@@ -14,4 +14,5 @@ public class Models {
 
   public static final int MAX_RETRIES = 3;
   public static final int DB_RETRIEVAL_LIMIT = 5;
+  public static final double RERANKING_SCORE_THRESHOLD = 0.6;
 }

@@ -9,13 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Data Access Service for capital, continent, and capital_continent relationships
@@ -30,7 +32,7 @@ public class CapitalDataAccessDAO {
     }
 
     // Capital-related methods
-    public List<Map<String, Object>> searchEmbeddings(String searchText, String embedType) {
+    public List<CapitalChunkRow> searchEmbeddings(String searchText, String embedType) {
         String sql = """
         SELECT 
             cc.chunk_id, 
@@ -64,7 +66,20 @@ public class CapitalDataAccessDAO {
         LIMIT ?
         """;
 
-        return jdbcTemplate.queryForList(sql, searchText, embedType, Models.DB_RETRIEVAL_LIMIT);
+        List<Map<String, Object>> listMap = jdbcTemplate.queryForList(sql, searchText, embedType, Models.DB_RETRIEVAL_LIMIT);
+
+        return listMap.stream().map(stringObjectMap ->
+                new CapitalChunkRow(
+                    (int) stringObjectMap.get("chunk_id"),
+                    (String) stringObjectMap.get("capital"),
+                    (String) stringObjectMap.get("country"),
+                    (String) stringObjectMap.get("embed"),
+                    (String) stringObjectMap.get("content"),
+                    (String) stringObjectMap.get("chunk"),
+                    (String) stringObjectMap.get("continents"),
+                    (Double) stringObjectMap.get("distance")
+                ))
+            .toList();
     }
 
     public int insertCapital(String capital, String country) {
@@ -236,8 +251,8 @@ public class CapitalDataAccessDAO {
     //             "JOIN continents cont ON cc.continent_id = cont.continent_id " +
     //             "WHERE c.capital = ?";
     //
-    //     List<CapitalDetailRow> rows = jdbcTemplate.query(sql, new Object[]{capitalName}, (rs, rowNum) -> {
-    //         CapitalDetailRow row = new CapitalDetailRow();
+    //     List<CapitalChunkRow> rows = jdbcTemplate.query(sql, new Object[]{capitalName}, (rs, rowNum) -> {
+    //         CapitalChunkRow row = new CapitalChunkRow();
     //         row.setCapitalId(rs.getInt("capital_id"));
     //         row.setCapital(rs.getString("capital"));
     //         row.setCountry(rs.getString("country"));
@@ -253,7 +268,7 @@ public class CapitalDataAccessDAO {
     //     }
     //
     //     // Group by capital (should be only one in this case)
-    //     CapitalDetailRow firstRow = rows.get(0);
+    //     CapitalChunkRow firstRow = rows.get(0);
     //     Capital capital = new Capital(
     //             firstRow.getCapitalId(),
     //             firstRow.getCapital(),
@@ -265,7 +280,7 @@ public class CapitalDataAccessDAO {
     //
     //     // Collect all continents
     //     List<String> continents = rows.stream()
-    //             .map(CapitalDetailRow::getContinentName)
+    //             .map(CapitalChunkRow::getContinentName)
     //             .collect(Collectors.toList());
     //
     //     return Optional.of(new CapitalDetail(capital, continents));
@@ -290,7 +305,7 @@ public class CapitalDataAccessDAO {
 
         List<String> continentNames = capital.capitalData().continents().stream()
             .map(CapitalData.Continent::getDisplayName)
-            .collect(Collectors.toList());
+            .collect(toList());
 
         // Insert or get continents and link them
         for (String continentName : continentNames) {
@@ -475,17 +490,30 @@ public class CapitalDataAccessDAO {
         }
     }
 
-    private static class CapitalDetailRow {
-        private int capitalId;
+    public static class CapitalChunkRow {
+        private int chunkId;
         private String capital;
         private String country;
         private String embedType;
         private String content;
         private String chunk;
         private String continentName;
+        private Double distance;
+        private Double rerankingScore;
 
-        public int getCapitalId() { return capitalId; }
-        public void setCapitalId(int capitalId) { this.capitalId = capitalId; }
+        public CapitalChunkRow(int chunkId, String capital, String country, String embedType, String content, String chunk, String continentName, Double distance) {
+            this.chunkId = chunkId;
+            this.capital = capital;
+            this.country = country;
+            this.embedType = embedType;
+            this.content = content;
+            this.chunk = chunk;
+            this.continentName = continentName;
+            this.distance = distance;
+        }
+
+        public int getChunkId() { return chunkId; }
+        public void setChunkId(int chunkId) { this.chunkId = chunkId; }
 
         public String getCapital() { return capital; }
         public void setCapital(String capital) { this.capital = capital; }
@@ -504,5 +532,11 @@ public class CapitalDataAccessDAO {
 
         public String getContinentName() { return continentName; }
         public void setContinentName(String continentName) { this.continentName = continentName; }
+
+        public Double getDistance() { return distance; }
+        public void setDistance(Double distance) { this.distance = distance; }
+
+        public Double getRerankingScore() { return rerankingScore;}
+        public void setRerankingScore(Double rerankingScore) { this.rerankingScore = rerankingScore;}
     }
 }
