@@ -75,7 +75,7 @@ public class ChatService extends AbstractBase {
     // create an AI Assistant only once
     if(assistant == null) {
       assistant = AiServices.builder(ChatService.ChatAssistant.class)
-          .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
+          .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
           .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
                     memoryId,
                     MessageWindowChatMemory.withMaxMessages(10)))

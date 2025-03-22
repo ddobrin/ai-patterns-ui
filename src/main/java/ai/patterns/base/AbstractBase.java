@@ -4,6 +4,7 @@ import static ai.patterns.utils.Models.MODEL_EMBEDDING_TEXT;
 import static ai.patterns.utils.Ansi.cyan;
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
 
+import ai.patterns.web.endpoints.ChatEndpoint;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
@@ -59,17 +60,18 @@ public abstract class AbstractBase {
     }
 
     /** Create a streaming chat model. */
-    protected StreamingChatLanguageModel getChatLanguageModelStreaming(final String modelName) {
+    protected StreamingChatLanguageModel getChatLanguageModelStreaming(final ChatEndpoint.ChatOptions chatOptions) {
         return VertexAiGeminiStreamingChatModel.builder()
                 .project(System.getenv("GCP_PROJECT_ID"))
                 .location(System.getenv("GCP_LOCATION"))
-                .modelName(modelName)
+                .modelName(chatOptions.model())
                 .safetySettings(Map.of(
                     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, SafetyThreshold.BLOCK_NONE,
                     HarmCategory.HARM_CATEGORY_HARASSMENT, SafetyThreshold.BLOCK_NONE,
                     HarmCategory.HARM_CATEGORY_HATE_SPEECH, SafetyThreshold.BLOCK_NONE,
                     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, SafetyThreshold.BLOCK_NONE
                 ))
+                .useGoogleSearch(chatOptions.useWebsearch())
                 .build();
     }
 
