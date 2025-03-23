@@ -23,11 +23,11 @@ public class RAGUtils {
     }
 
     return vectorData.stream()
-        .sorted((o1, o2) -> o2.getDistance() > o1.getDistance() ? 1 : -1)
+        .sorted((o1, o2) -> o2.getDistance() < o1.getDistance() ? 1 : -1)
         .map(capitalChunk -> {
           if (capitalChunk.getDistance() != null && capitalChunk.getContent() != null && capitalChunk.getChunk() != null) {
             return String.format("""
-                    * Similarity: **%.3f** %s
+                    * Distance: **%.3f** %s
                         * Embedded
                             > %s
                         * Context
