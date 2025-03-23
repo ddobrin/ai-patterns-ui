@@ -118,7 +118,7 @@ export default function AiPatterns() {
             <Checkbox label="Filtering" {...field(model.filtering) } />
             <Checkbox label="Query compression" {...field(model.queryCompression) } />
             <Checkbox label="Query routing" {...field(model.queryRouting) } />
-            <Checkbox label="HYpothetical Document Embedding" {...field(model.hyde) } />
+            <Checkbox label="Hypothetical Document Embedding" {...field(model.hyde) } />
             <Checkbox label="Reranking" {...field(model.reranking) } />
           </div>
           <h3>Settings</h3>

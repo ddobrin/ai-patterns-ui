@@ -72,15 +72,12 @@ public class ChatService extends AbstractBase {
       chatMemory.add(dev.langchain4j.data.message.SystemMessage.from(systemMessage));
     }
 
-    // create an AI Assistant only once
-    if(assistant == null) {
-      assistant = AiServices.builder(ChatService.ChatAssistant.class)
-          .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
-          .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
-                    memoryId,
-                    MessageWindowChatMemory.withMaxMessages(10)))
-          .build();
-    }
+    assistant = AiServices.builder(ChatService.ChatAssistant.class)
+        .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
+        .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
+                  memoryId,
+                  MessageWindowChatMemory.withMaxMessages(10)))
+        .build();
 
     // compress the query if required
     if(options.queryCompression()){

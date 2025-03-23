@@ -58,7 +58,7 @@ public class AgenticRAGService extends AbstractBase {
                         String messageAttachments,
                         ChatOptions options) {
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
-        .streamingChatLanguageModel(getChatLanguageModelStreaming(options.model()))
+        .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
         .tools(historyGeographyTool, touristBureauMCPTool)
         .chatMemoryProvider(chatMemoryProvider)
         .build();
