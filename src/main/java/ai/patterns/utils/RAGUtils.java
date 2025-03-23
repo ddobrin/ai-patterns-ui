@@ -46,30 +46,37 @@ public class RAGUtils {
   }
 
   // Format vector data to send to LLM as RAG data
-  public static String augmentWithVectorData(String userMessage, ChatOptions options, CapitalDataAccessDAO dataAccess) {
-    // no RAG? ok
-    if (!options.enableRAG() || (options.chunkingType() == ChunkingType.NONE)) {
-      return "";
-    }
-
-    // search the vector store by query and embedding type !
-    List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
-
-    if (vectorData == null || vectorData.isEmpty()) {
-      System.out.println("Vector data is empty or null.");
-      return "No data found in the vector store";
-    }
-
-    return vectorData.stream()
-        .map(CapitalDataAccessDAO.CapitalChunkRow::getChunk)
-        .collect(Collectors.joining("\n"));
-  }
+  // public static String augmentWithVectorData(String userMessage, ChatOptions options, CapitalDataAccessDAO dataAccess) {
+  //   // no RAG? ok
+  //   if (!options.enableRAG() || (options.chunkingType() == ChunkingType.NONE)) {
+  //     return "";
+  //   }
+  //
+  //   // search the vector store by query and embedding type !
+  //   List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(userMessage, options.chunkingType().name().toLowerCase());
+  //
+  //   if (vectorData == null || vectorData.isEmpty()) {
+  //     System.out.println("Vector data is empty or null.");
+  //     return "No data found in the vector store";
+  //   }
+  //
+  //   return vectorData.stream()
+  //       .map(CapitalDataAccessDAO.CapitalChunkRow::getChunk)
+  //       .collect(Collectors.joining("\n"));
+  // }
 
   // Format vector data to send to LLM as RAG data
   // return as List
-  public static List<CapitalDataAccessDAO.CapitalChunkRow> augmentWithVectorDataList(String userMessage, String embedType, CapitalDataAccessDAO dataAccess) {
+  public static List<CapitalDataAccessDAO.CapitalChunkRow> augmentWithVectorDataList(
+      String userMessage,
+      ChatOptions options,
+      CapitalDataAccessDAO dataAccess) {
     // search the vector store by query and embedding type !
-    List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(userMessage, embedType);
+    List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(
+        userMessage,
+        options.chunkingType().name().toLowerCase(),
+        options.filtering() ? options.capital() : null,
+        options.filtering() ? options.continent() : null);
 
     if (vectorData == null || vectorData.isEmpty()) {
       System.out.println("Vector data is empty or null.");

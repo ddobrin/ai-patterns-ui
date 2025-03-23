@@ -58,7 +58,9 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
         boolean hyde,
         boolean reranking,
         boolean writeActions,
-        boolean showDataSources) {
+        boolean showDataSources,
+        String capital,
+        String continent) {
     }
 
     private final ChatService chatService;
@@ -89,7 +91,10 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
                  false,
                  false,
                 false,
-                 true);
+                 true,
+                 "",
+                ""
+                );
         }
         
         // Append attachments to the user message if any exist for this chat

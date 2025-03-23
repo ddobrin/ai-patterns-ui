@@ -103,7 +103,7 @@ public class ChatService extends AbstractBase {
 
     if (options.enableRAG()) {
       capitalChunks = augmentWithVectorDataList(userMessage,
-                                                 options.chunkingType().name().toLowerCase(),
+                                                 options,
                                                  dataAccess);
 
       if (options.reranking()) {

@@ -18,6 +18,31 @@ const models = [
   'gemini-1.5-pro-002'
 ];
 
+const capitals : string[] = [
+    '',
+  'Beijing',
+  'Berlin',
+  'Bern',
+  'London',
+  'Madrid',
+  'Ottawa',
+  'Paris',
+  'Rome',
+  'Tokyo',
+  'Vienna'
+];
+
+const continents : string[] = [
+    '',
+  'Africa',
+  'Antarctica',
+  'Asia',
+  'Europe',
+  'North America',
+  'Oceania',
+  'South America'
+];
+
 export enum ChunkingType {
   NONE = 'NONE',
   HIERARCHICAL = 'HIERARCHICAL',
@@ -52,7 +77,9 @@ const defaultOptions: ChatOptions = {
   hyde: false,
   reranking: false,
   writeActions: false,
-  showDataSources: true
+  showDataSources: true,
+  capital: capitals[0],
+  continent: continents[0]
 };
 
 export default function AiPatterns() {
@@ -106,6 +133,14 @@ export default function AiPatterns() {
           <h3>LLMs</h3>
           <ComboBox label="Models" {...field(model.model)} items={models} />
           <TextArea label="System prompt" {...field(model.systemMessage)} />
+
+          <h3>Capabilities</h3>
+          <div className="vertical-checkboxes">
+            <Checkbox label="Enable RAG" {...field(model.enableRAG)} />
+            <Checkbox label="Use Agents" {...field(model.useAgents)} />
+            <Checkbox label="Use WebSearch" {...field(model.useWebsearch)} />
+          </div>
+
           <h3>Chunking Methods</h3>
           <RadioGroup theme={"vertical"} {...field(model.chunkingType)}>
             <RadioButton value={ChunkingType.NONE} label="None (Prompt Stuffing)" />
@@ -116,20 +151,18 @@ export default function AiPatterns() {
           </RadioGroup>
           <h3>Retrieval Methods</h3>
           <div className="vertical-checkboxes">
-            <Checkbox label="Filtering" {...field(model.filtering) } />
             <Checkbox label="Query compression" {...field(model.queryCompression) } />
             <Checkbox label="Query routing" {...field(model.queryRouting) } />
             <Checkbox label="Hypothetical Document Embedding" {...field(model.hyde) } />
             <Checkbox label="Reranking" {...field(model.reranking) } />
           </div>
-          <h3>Settings</h3>
-          <Checkbox label="Use Vertex" {...field(model.useVertex)} />
-          <h3>Capabilities</h3>
-          <div className="vertical-checkboxes">
-            <Checkbox label="Enable RAG" {...field(model.enableRAG)} />
-            <Checkbox label="Use Agents" {...field(model.useAgents)} />
-            <Checkbox label="Use WebSearch" {...field(model.useWebsearch)} />
-          </div>
+            <h3>Filtering</h3>
+            <Checkbox label="Enable Filtering" {...field(model.filtering) } />
+            <div className = "side-by-side-comboboxes">
+              <ComboBox label="Capitals" {...field(model.capital)} items={capitals} />
+              <ComboBox label="Continents" {...field(model.continent)} items={continents} />
+            </div>
+
           <h3>Security</h3>
           <div className="side-by-side-checkboxes">
             <Checkbox label="Enable safety settings" {...field(model.enableSafety)} />
@@ -139,6 +172,8 @@ export default function AiPatterns() {
           <Checkbox label="Evaluate responses" {...field(model.evaluateResponse)} />
           <h3>Advanced Capabilities</h3>
           <Checkbox label="Write actions" {...field(model.writeActions)} />
+          <h3>Settings</h3>
+          <Checkbox label="Use Vertex" {...field(model.useVertex)} />
           <h3>Show sources</h3>
           <Checkbox label="Show data sources" {...field(model.showDataSources)} />
           <div className="space"></div>

@@ -32,7 +32,11 @@ public class CapitalDataAccessDAO {
     }
 
     // Capital-related methods
-    public List<CapitalChunkRow> searchEmbeddings(String searchText, String embedType) {
+    public List<CapitalChunkRow> searchEmbeddings(
+        String searchText,
+        String embedType,
+        String capital,
+        String continent) {
         String sql = """
         SELECT 
             cc.chunk_id, 
@@ -53,6 +57,24 @@ public class CapitalDataAccessDAO {
             continents cont ON cc_rel.continent_id = cont.continent_id
         WHERE 
             cc.embed = ?::embed_type
+        """;
+
+        List<Object> params = new ArrayList<>();
+        params.add(searchText);      // For the embedding function
+        params.add(embedType);
+
+        if ((capital != null) && !capital.isEmpty()){
+            sql += " AND c.capital = ? ";
+            params.add(capital);
+        }
+
+        if ((continent != null) && !continent.isEmpty()){
+            sql += " AND cont.continent_name = ? ";
+            params.add(continent);
+        }
+
+        sql += """
+        
         GROUP BY 
             cc.chunk_id, 
             c.capital, 
@@ -66,7 +88,9 @@ public class CapitalDataAccessDAO {
         LIMIT ?
         """;
 
-        List<Map<String, Object>> listMap = jdbcTemplate.queryForList(sql, searchText, embedType, Models.DB_RETRIEVAL_LIMIT);
+        params.add(Models.DB_RETRIEVAL_LIMIT);
+
+        List<Map<String, Object>> listMap = jdbcTemplate.queryForList(sql, params.toArray());
 
         return listMap.stream().map(stringObjectMap ->
                 new CapitalChunkRow(

@@ -6,10 +6,13 @@ import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
 import static ai.patterns.utils.RAGUtils.formatSearchResults;
 import static ai.patterns.utils.RAGUtils.prepareUserMessage;
+import static ai.patterns.web.endpoints.ChatEndpoint.ChunkingType.HYPOTHETICAL;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.data.TopicReport;
+import ai.patterns.utils.Models;
+import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
 import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.AiServices;
@@ -48,7 +51,29 @@ public class HistoryGeographyTool extends AbstractBase {
     String additionalVectorData = "";
     String sources = "";
 
-    vectorDataList = augmentWithVectorDataList(query, ChunkingType.HYPOTHETICAL.name().toLowerCase(), dataAccess);
+    vectorDataList = augmentWithVectorDataList(
+        query,
+        new ChatOptions("",
+            true,
+            false,
+            false,
+            Models.MODEL_GEMINI_FLASH,
+            true,
+            true,
+            false,
+            false,
+             HYPOTHETICAL,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            "",
+            ""
+        ),
+        dataAccess);
 
     // format RAG data to send to LLM
     additionalVectorData = vectorDataList.stream()
