@@ -2,13 +2,13 @@ import {nanoid} from "nanoid";
 import {useEffect, useRef, useState} from "react";
 import { Chat } from '@vaadin/flow-frontend/chat/Chat.js';
 import {ChatEndpoint} from "Frontend/generated/endpoints";
-import ChatOptions from "Frontend/generated/ai/patterns/web/endpoints/ChatEndpoint/ChatOptions";
+import ChatOptions from "Frontend/generated/ai/patterns/utils/ChatUtils/ChatOptions";
 import '@vaadin/icons';
 import '@vaadin/vaadin-lumo-styles/icons';
 
 import './index.css';
 import {useForm} from "@vaadin/hilla-react-form";
-import ChatOptionsModel from "Frontend/generated/ai/patterns/web/endpoints/ChatEndpoint/ChatOptionsModel";
+import ChatOptionsModel from "Frontend/generated/ai/patterns/utils/ChatUtils/ChatOptionsModel";
 import {Checkbox, ComboBox, TextArea, RadioGroup, RadioButton, Button, Icon, Tooltip} from "@vaadin/react-components";
 
 const models = [

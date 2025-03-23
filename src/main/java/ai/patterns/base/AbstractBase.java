@@ -4,7 +4,7 @@ import static ai.patterns.utils.Models.MODEL_EMBEDDING_TEXT;
 import static ai.patterns.utils.Ansi.cyan;
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
 
-import ai.patterns.web.endpoints.ChatEndpoint;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
@@ -60,7 +60,7 @@ public abstract class AbstractBase {
     }
 
     /** Create a streaming chat model. */
-    protected StreamingChatLanguageModel getChatLanguageModelStreaming(final ChatEndpoint.ChatOptions chatOptions) {
+    protected StreamingChatLanguageModel getChatLanguageModelStreaming(final ChatOptions chatOptions) {
         return VertexAiGeminiStreamingChatModel.builder()
                 .project(System.getenv("GCP_PROJECT_ID"))
                 .location(System.getenv("GCP_LOCATION"))

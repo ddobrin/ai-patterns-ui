@@ -6,14 +6,13 @@ import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
 import static ai.patterns.utils.RAGUtils.formatSearchResults;
 import static ai.patterns.utils.RAGUtils.prepareUserMessage;
-import static ai.patterns.web.endpoints.ChatEndpoint.ChunkingType.HYPOTHETICAL;
+import static ai.patterns.utils.ChatUtils.ChunkingType.HYPOTHETICAL;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.data.TopicReport;
 import ai.patterns.utils.Models;
-import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
-import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;

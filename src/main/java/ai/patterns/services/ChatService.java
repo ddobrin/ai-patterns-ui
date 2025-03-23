@@ -6,7 +6,7 @@ import static ai.patterns.utils.RAGUtils.*;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
-import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -72,6 +72,7 @@ public class ChatService extends AbstractBase {
       chatMemory.add(dev.langchain4j.data.message.SystemMessage.from(systemMessage));
     }
 
+    // build an AIAssistant with a streaming model and memory
     assistant = AiServices.builder(ChatService.ChatAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
         .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
@@ -106,6 +107,7 @@ public class ChatService extends AbstractBase {
                                                  options,
                                                  dataAccess);
 
+      // use reranking if enabled
       if (options.reranking()) {
         System.out.println("\n" + blue(">>> RERANKING\n"));
 
@@ -120,6 +122,7 @@ public class ChatService extends AbstractBase {
             )
             .toList();
 
+        // score all chunks
         Response<List<Double>> scoredCapitalChunks = scoringModel.scoreAll(contents, userMessage);
 
         for (int i = 0; i < scoredCapitalChunks.content().size(); i++) {

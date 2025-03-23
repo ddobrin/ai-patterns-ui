@@ -1,6 +1,7 @@
 package ai.patterns.web.endpoints;
 
-import ai.patterns.utils.Models;
+import ai.patterns.utils.ChatUtils;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ import reactor.core.publisher.Flux;
 
 @BrowserCallable
 @AnonymousAllowed
-public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
+public class ChatEndpoint implements AiChatService<ChatOptions> {
 
     private static final String ATTACHMENT_TEMPLATE = """
         Answer the user question using the information from the following attachment:
@@ -33,36 +34,6 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
     // Map to store attachments by chatId
     private final Map<String, Map<String, String>> attachments = new HashMap<>();
 
-    public enum ChunkingType {
-        NONE,
-        HIERARCHICAL,
-        HYPOTHETICAL,
-        CONTEXTUAL,
-        LATE
-    }
-
-    public record ChatOptions(
-        String systemMessage,
-        boolean useVertex,
-        boolean useAgents,
-        boolean useWebsearch,
-        String model,
-        boolean enableSafety,
-        boolean useGuardrails,
-        boolean evaluateResponse,
-        boolean enableRAG,
-        ChunkingType chunkingType,
-        boolean filtering,
-        boolean queryCompression,
-        boolean queryRouting,
-        boolean hyde,
-        boolean reranking,
-        boolean writeActions,
-        boolean showDataSources,
-        String capital,
-        String continent) {
-    }
-
     private final ChatService chatService;
     private final AgenticRAGService agenticRAGService;
 
@@ -73,28 +44,9 @@ public class ChatEndpoint implements AiChatService<ChatEndpoint.ChatOptions> {
 
     @Override
     public Flux<String> stream(String chatId, String userMessage, @Nullable ChatOptions options) {
-        // if chat options are not captured, set some defaults
+        // if chat options are not captured, set defaults
         if (options == null) {
-            options = new ChatOptions("",
-                true,
-                false,
-                false,
-                 Models.MODEL_GEMINI_FLASH,
-                true,
-                true,
-                false,
-                false,
-                 ChunkingType.NONE,
-                 false,
-                 false,
-                 false,
-                 false,
-                 false,
-                false,
-                 true,
-                 "",
-                ""
-                );
+            options = ChatUtils.getDefaultChatOptions();
         }
         
         // Append attachments to the user message if any exist for this chat

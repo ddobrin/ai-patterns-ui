@@ -6,7 +6,7 @@ import static ai.patterns.utils.Ansi.blue;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.tools.HistoryGeographyTool;
 import ai.patterns.tools.TouristBureauMCPTool;
-import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
@@ -57,6 +57,7 @@ public class AgenticRAGService extends AbstractBase {
                         String userMessage,
                         String messageAttachments,
                         ChatOptions options) {
+    // create AIAssistant with a streaming model and tools enabled
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
         .tools(historyGeographyTool, touristBureauMCPTool)

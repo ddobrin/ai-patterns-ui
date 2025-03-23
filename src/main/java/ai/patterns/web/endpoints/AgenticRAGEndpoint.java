@@ -1,7 +1,7 @@
 package ai.patterns.web.endpoints;
 
 import ai.patterns.services.AgenticRAGService;
-import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 

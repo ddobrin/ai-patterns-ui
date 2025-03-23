@@ -1,8 +1,7 @@
 package ai.patterns.utils;
 
 import ai.patterns.dao.CapitalDataAccessDAO;
-import ai.patterns.web.endpoints.ChatEndpoint.ChatOptions;
-import ai.patterns.web.endpoints.ChatEndpoint.ChunkingType;
+import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.PromptTemplate;
