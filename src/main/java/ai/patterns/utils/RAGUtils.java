@@ -1,5 +1,7 @@
 package ai.patterns.utils;
 
+import static java.util.Locale.filter;
+
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -82,15 +84,29 @@ public class RAGUtils {
       return new ArrayList<>();
     }
 
+    // post-processing filter
+    // remove for a better solution
+    if(options.filtering()) {
+      if((options.capital() != null) || options.capital().isBlank())
+        vectorData = vectorData.stream()
+          .filter(row -> options.continent().equals(row.getContinentName()))
+          .collect(Collectors.toList());
+
+      if((options.continent() != null) || options.continent().isBlank())
+        vectorData = vectorData.stream()
+          .filter(row -> options.capital().equals(row.getCapital()))
+          .collect(Collectors.toList());
+    }
+
     return vectorData;
   }
 
   // prepare UserMessage for LLM with sources appended
   public static String prepareUserMessage(String userMessage,
-                                                      String messageAttachments,
-                                                      String additionalVectorData,
-                                                      String sources,
-                                                      boolean showDataSources){
+                                          String messageAttachments,
+                                          String additionalVectorData,
+                                          String sources,
+                                          boolean showDataSources){
     String returnSources = "";
     if (showDataSources && !sources.trim().isEmpty()) {
         returnSources = String.format("""
@@ -101,6 +117,55 @@ public class RAGUtils {
           %s
 
           """, sources);
+    }
+
+    String vectorData = additionalVectorData;
+    if(additionalVectorData != null && ! additionalVectorData.isEmpty()) {
+      vectorData = String.format("""
+          Answer the question using the following information:
+          <excerpts>
+          %s
+          </excerpts>
+          """, additionalVectorData);
+    }
+
+    return PromptTemplate.from("""
+        Here's the question from the user:
+        <question>
+        {{userMessage}}
+        </question>
+        
+        {{attachments}}
+        
+        {{contents}}
+        
+        {{sources}}
+        """).apply(Map.of(
+        "userMessage", userMessage,
+        "attachments", messageAttachments,
+        "contents", vectorData,
+        "sources", returnSources
+    )).toUserMessage().singleText();
+  }
+
+  public static String prepareUserMessage(String userMessage,
+      String messageAttachments,
+      String additionalVectorData,
+      String sources,
+      String steps,
+      boolean showDataSources){
+    String returnSources = "";
+    if (showDataSources && (!sources.trim().isEmpty() || !steps.isEmpty())) {
+      returnSources = String.format("""
+          Please add at the end of your answer, the following content as-is, for reference purposes:
+
+          #### Sources
+
+          %s
+          #### Execution steps
+          %s
+
+          """, sources, steps);
     }
 
     String vectorData = additionalVectorData;
