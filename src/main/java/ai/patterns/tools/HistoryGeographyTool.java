@@ -4,7 +4,7 @@ import static ai.patterns.utils.Ansi.blue;
 import static ai.patterns.utils.Ansi.yellow;
 import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
-import static ai.patterns.utils.RAGUtils.formatSearchResults;
+import static ai.patterns.utils.RAGUtils.formatVectorSearchResults;
 import static ai.patterns.utils.RAGUtils.prepareUserMessage;
 import static ai.patterns.utils.ChatUtils.ChunkingType.HYPOTHETICAL;
 
@@ -80,7 +80,7 @@ public class HistoryGeographyTool extends AbstractBase {
         .collect(Collectors.joining("\n"));
 
     // format sources in returnable format
-    sources = formatSearchResults(vectorDataList);
+    sources = formatVectorSearchResults(vectorDataList);
 
     //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)
     String finalUserMessage = prepareUserMessage(query,
