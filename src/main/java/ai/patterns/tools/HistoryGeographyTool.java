@@ -11,6 +11,7 @@ import static ai.patterns.utils.ChatUtils.ChunkingType.HYPOTHETICAL;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.data.TopicReport;
+import ai.patterns.utils.ChatUtils;
 import ai.patterns.utils.Models;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.agent.tool.Tool;
@@ -41,7 +42,7 @@ public class HistoryGeographyTool extends AbstractBase {
     System.out.println(blue(">>> Invoking `searchInformation` tool with query: ") + query);
 
     TopicAssistant topicAssistant = AiServices.builder(TopicAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(MODEL_GEMINI_FLASH))
+        .chatLanguageModel(getChatLanguageModel(ChatUtils.getDefaultChatOptions()))
         .build();
 
     // augment with vector data if RAG is enabled

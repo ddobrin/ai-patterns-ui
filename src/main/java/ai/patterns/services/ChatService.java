@@ -46,7 +46,7 @@ public class ChatService extends AbstractBase {
                     ChatOptions options) {
     if(assistant == null) {
       assistant = AiServices.builder(ChatService.ChatAssistant.class)
-          .chatLanguageModel(getChatLanguageModel(options.model()))
+          .chatLanguageModel(getChatLanguageModel(options))
           .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
           .build();
     }
@@ -88,7 +88,7 @@ public class ChatService extends AbstractBase {
     if(options.queryCompression()){
       steps.add("   1. Executing Query Compression for the Original Query: " +
           "_**" + userMessage.replaceAll("\n", " ").trim() + "**_");
-      userMessage = compressQuery(chatId, userMessage, chatMemory, getChatLanguageModel(options.model()));
+      userMessage = compressQuery(chatId, userMessage, chatMemory, getChatLanguageModel(options));
 
       System.out.println(blue("\n>>> COMPRESSED QUERY:\n") + cyan(userMessage));
       steps.add("   1. Generated the Compressed Query: _**" + userMessage.trim() + "**_");
@@ -100,7 +100,7 @@ public class ChatService extends AbstractBase {
     if (options.hyde()) {
       steps.add("   1. Collecting Hypothetical Answer from UserMessage: " +
           "_**" + userMessage.replaceAll("\n", " ").trim() + "**_");
-      userMessage = hypotheticalAnswer(chatId, userMessage, chatMemory, getChatLanguageModel(options.model()));
+      userMessage = hypotheticalAnswer(chatId, userMessage, chatMemory, getChatLanguageModel(options));
 
       System.out.println(blue("\n* HYPOTHETICAL ANSWER:\n") + cyan(userMessage));
       steps.add("   1. Generated Hypothetical Answer: _**" + userMessage.trim() + "**_");

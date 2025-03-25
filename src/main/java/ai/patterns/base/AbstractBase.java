@@ -5,6 +5,7 @@ import static ai.patterns.utils.Ansi.cyan;
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
 
 import ai.patterns.utils.ChatUtils.ChatOptions;
+import ai.patterns.utils.Models;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
@@ -16,8 +17,6 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.scoring.ScoringModel;
-import dev.langchain4j.model.vertexai.HarmCategory;
-import dev.langchain4j.model.vertexai.SafetyThreshold;
 import dev.langchain4j.model.vertexai.VertexAiEmbeddingModel;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiGeminiStreamingChatModel;
@@ -31,7 +30,6 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -44,18 +42,13 @@ public abstract class AbstractBase {
     // ------------------------------------------------------------
 
     /** Create a chat model. */
-    protected ChatLanguageModel getChatLanguageModel(final String modelName) {
+    protected ChatLanguageModel getChatLanguageModel(final ChatOptions chatOptions) {
         return VertexAiGeminiChatModel.builder()
                 .project(System.getenv("GCP_PROJECT_ID"))
                 .location(System.getenv("GCP_LOCATION"))
-                .modelName(modelName)
+                .modelName(chatOptions.model())
                 .maxRetries(3)
-                .safetySettings(Map.of(
-                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, SafetyThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_HARASSMENT, SafetyThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_HATE_SPEECH, SafetyThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, SafetyThreshold.BLOCK_NONE
-                ))
+                .safetySettings(chatOptions.enableSafety() ? Models.SAFETY_SETTINGS_ON : Models.SAFETY_SETTINGS_OFF)
                 .build();
     }
 
@@ -65,12 +58,7 @@ public abstract class AbstractBase {
                 .project(System.getenv("GCP_PROJECT_ID"))
                 .location(System.getenv("GCP_LOCATION"))
                 .modelName(chatOptions.model())
-                .safetySettings(Map.of(
-                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, SafetyThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_HARASSMENT, SafetyThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_HATE_SPEECH, SafetyThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, SafetyThreshold.BLOCK_NONE
-                ))
+                .safetySettings(chatOptions.enableSafety() ? Models.SAFETY_SETTINGS_ON : Models.SAFETY_SETTINGS_OFF)
                 .useGoogleSearch(chatOptions.useWebsearch())
                 .build();
     }

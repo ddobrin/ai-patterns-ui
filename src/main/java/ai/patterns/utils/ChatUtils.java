@@ -12,7 +12,7 @@ public class ChatUtils {
           false,
           false,
            Models.MODEL_GEMINI_FLASH,
-          true,
+          false,
           true,
           false,
           false,

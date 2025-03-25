@@ -67,7 +67,7 @@ const defaultOptions: ChatOptions = {
   useAgents: false,
   useWebsearch: false,
   model: models[0],
-  enableSafety: true,
+  enableSafety: false,
   useGuardrails: false,
   evaluateResponse: false,
   chunkingType: ChunkingType.NONE,

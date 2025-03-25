@@ -7,6 +7,7 @@ import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.data.TopicReport;
+import ai.patterns.utils.ChatUtils;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.mcp.McpToolProvider;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
@@ -80,7 +81,7 @@ public class TouristBureauMCPTool extends AbstractBase {
 
     TopicMCPAssistant topicMCPAssistant = AiServices.builder(
             TopicMCPAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(MODEL_GEMINI_FLASH))
+        .chatLanguageModel(getChatLanguageModel(ChatUtils.getDefaultChatOptions()))
         .toolProvider(toolProvider)
         .build();
 
