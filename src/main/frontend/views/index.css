@@ -101,9 +101,18 @@
                 display: none;
             }
 
-            /* When the h3 is clicked, show the next ul */
+            /* When the h4 is clicked, show the next ul */
             h4.expanded + ul {
                 display: block;
+            }
+
+            h4 + ul strong + ul li {
+                list-style: none;
+                border-left: 2px solid var(--lumo-success-color);
+                margin: 0.5em 0.5em 0.5em 0;
+                padding: 0.5em;
+                color: var(--lumo-body-text-color);
+                background-color: var(--lumo-success-color-10pct);
             }
 
             .scroller {
