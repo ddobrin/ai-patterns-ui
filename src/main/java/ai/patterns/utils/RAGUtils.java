@@ -67,14 +67,14 @@ public class RAGUtils {
     // post-processing filter
     // remove for a better solution
     if(options.filtering()) {
-      if((options.capital() != null) || options.capital().isBlank())
-        vectorData = vectorData.stream()
-          .filter(row -> options.continent().equals(row.getContinentName()))
-          .collect(Collectors.toList());
-
-      if((options.continent() != null) || options.continent().isBlank())
+      if((options.capital() != null) && !options.capital().isEmpty())
         vectorData = vectorData.stream()
           .filter(row -> options.capital().equals(row.getCapital()))
+          .collect(Collectors.toList());
+
+      if((options.continent() != null) && !options.continent().isEmpty())
+        vectorData = vectorData.stream()
+          .filter(row -> options.continent().equals(row.getContinentName()))
           .collect(Collectors.toList());
     }
 
