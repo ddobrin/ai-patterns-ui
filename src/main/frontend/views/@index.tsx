@@ -95,8 +95,6 @@ export default function AiPatterns() {
     const chat = document.querySelector('vaadin-scroller');
 
     const handleClick = (event: Event) => { // Change the type to Event
-      console.log("clicked");
-
       const target = event.target as HTMLElement;
       if (target.tagName === 'H4') {
         target.classList.toggle('expanded');
