@@ -15,6 +15,7 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.scoring.ScoringModel;
 import dev.langchain4j.model.vertexai.VertexAiEmbeddingModel;
@@ -29,6 +30,7 @@ import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,6 +63,16 @@ public abstract class AbstractBase {
                 .safetySettings(chatOptions.enableSafety() ? Models.SAFETY_SETTINGS_ON : Models.SAFETY_SETTINGS_OFF)
                 .useGoogleSearch(chatOptions.useWebsearch())
                 .build();
+    }
+
+    /** Create an Ollama chat model */
+    protected ChatLanguageModel getChatLanguageModelOllama(final ChatOptions chatOptions) {
+        return OllamaChatModel.builder()
+            .baseUrl("https://llama-service-model-preloaded-360922367561.us-central1.run.app")
+            .modelName(chatOptions.model())
+            .maxRetries(3)
+            .timeout(Duration.ofSeconds(30))
+            .build();
     }
 
     /** Create an embedding model. */

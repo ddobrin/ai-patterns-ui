@@ -2,18 +2,17 @@ package ai.patterns.tools;
 
 import static ai.patterns.utils.Ansi.blue;
 import static ai.patterns.utils.Ansi.yellow;
-import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
+import static ai.patterns.utils.ChatUtils.ChunkingType.HYPOTHETICAL;
 import static ai.patterns.utils.RAGUtils.augmentWithVectorDataList;
 import static ai.patterns.utils.RAGUtils.formatVectorSearchResults;
 import static ai.patterns.utils.RAGUtils.prepareUserMessage;
-import static ai.patterns.utils.ChatUtils.ChunkingType.HYPOTHETICAL;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.data.TopicReport;
 import ai.patterns.utils.ChatUtils;
-import ai.patterns.utils.Models;
 import ai.patterns.utils.ChatUtils.ChatOptions;
+import ai.patterns.utils.Models;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
@@ -24,11 +23,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HistoryGeographyTool extends AbstractBase {
+public class HistoryGeographyToolOllama extends AbstractBase {
 
   private final CapitalDataAccessDAO dataAccess;
 
-  public HistoryGeographyTool(CapitalDataAccessDAO dataAccess){
+  public HistoryGeographyToolOllama(CapitalDataAccessDAO dataAccess){
     this.dataAccess = dataAccess;
   }
 
@@ -42,7 +41,7 @@ public class HistoryGeographyTool extends AbstractBase {
     System.out.println(blue(">>> Invoking `searchInformation` tool with query: ") + query);
 
     TopicAssistant topicAssistant = AiServices.builder(TopicAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(ChatUtils.getDefaultChatOptions(MODEL_GEMINI_FLASH)))
+        .chatLanguageModel(getChatLanguageModelOllama(ChatUtils.getDefaultChatOptions(Models.MODEL_GEMMA3_27B)))
         .build();
 
     // augment with vector data if RAG is enabled
@@ -57,7 +56,7 @@ public class HistoryGeographyTool extends AbstractBase {
             true,
             false,
             false,
-            Models.MODEL_GEMINI_FLASH,
+            Models.MODEL_GEMMA3_27B,
             false,
             true,
             false,

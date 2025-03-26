@@ -5,13 +5,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChatUtils {
 
-  public static @NotNull ChatOptions getDefaultChatOptions() {
+  public static @NotNull ChatOptions getDefaultChatOptions(String model) {
       @Nullable ChatUtils.@Nullable ChatOptions options;
       return new ChatOptions("",
           true,
           false,
           false,
-           Models.MODEL_GEMINI_FLASH,
+           model,
           false,
           true,
           false,

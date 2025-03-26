@@ -2,6 +2,7 @@ package ai.patterns.web.endpoints;
 
 import ai.patterns.utils.ChatUtils;
 import ai.patterns.utils.ChatUtils.ChatOptions;
+import ai.patterns.utils.Models;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public class ChatEndpoint implements AiChatService<ChatOptions> {
     public Flux<String> stream(String chatId, String userMessage, @Nullable ChatOptions options) {
         // if chat options are not captured, set defaults
         if (options == null) {
-            options = ChatUtils.getDefaultChatOptions();
+            options = ChatUtils.getDefaultChatOptions(Models.MODEL_GEMINI_FLASH);
         }
         
         // Append attachments to the user message if any exist for this chat

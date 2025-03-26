@@ -8,6 +8,7 @@ import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.data.TopicReport;
 import ai.patterns.utils.ChatUtils;
+import ai.patterns.utils.Models;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.mcp.McpToolProvider;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
@@ -114,14 +115,17 @@ public class TouristBureauMCPTool extends AbstractBase {
 
     TopicMCPAssistant topicMCPAssistant = AiServices.builder(
             TopicMCPAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(ChatUtils.getDefaultChatOptions()))
+        .chatLanguageModel(getChatLanguageModel(ChatUtils.getDefaultChatOptions(MODEL_GEMINI_FLASH)))
         .toolProvider(toolProvider)
         .build();
 
     String foundArticle;
     try{
       File file = new File(String.format("src/main/resources/capitals/%s_article.txt", city));
+
+      long start = System.currentTimeMillis();
       foundArticle = topicMCPAssistant.find(file.getAbsolutePath());
+      System.out.println("MCP call(ms): " + (System.currentTimeMillis() - start));
 
       System.out.println(yellow("\n-> Topic report: ") + foundArticle);
 

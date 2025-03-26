@@ -10,6 +10,7 @@ public class Models {
   public static final String MODEL_GEMINI_PRO       = "gemini-2.0-pro-exp-02-05";
   public static final String MODEL_GEMINI_FLASH_THINKING = "gemini-2.0-flash-thinking-exp-01-21";
   public static final String MODEL_GEMINI_FLASH_LITE = "gemini-2.0-flash-exp";
+  public static final String MODEL_GEMMA3_27B = "gemma3:27b";
 
   // Embedding Models
   // https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api?hl=en&authuser=2
