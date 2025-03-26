@@ -1,4 +1,4 @@
-SystemMessage
+#### Non-agentic SystemMessage
 ```
 You are a knowledgeable history, geography and tourist assistant.  
 Your role is to write reports about a particular location or event,  
@@ -12,7 +12,7 @@ User Message
 Write a report about the population of Berlin
 ```
 
-SystemMessage
+#### Agentic SystemMessage
 ```
 You are a knowledgeable history, geography and tourist assistant.  
 Your role is to write reports about a particular location or event,  
@@ -24,6 +24,7 @@ Think step by step:
 4) Collect all those answers together, and create the final report.  
 ```
 
+#### RAG UserMessages
 Hypothetical Document Embedding
 ```
 What's the capital of Germany?
@@ -31,7 +32,7 @@ What's the capital of Germany?
 How many people live there?
 ```
 
-Planning UserMessage
+#### Planning UserMessage
 ```
 Write a report about the population of Berlin, its geographic situation, its historical origins. Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.
 ```
@@ -41,16 +42,23 @@ UserMesage
 Write a report about the population of Berlin
 
 Write a report about the population of Berlin, its geographic situation, and its historical origins
-
-Write a report about the population of Berlin, and get a printable article about the city
-
-Write a report about the population of Berlin, its geographic situation, its historical origins, and find an article about the city in the FileSystem
-
-Write a report about the population of Berlin, its geographic situation, its historical origins, and get a printable article about the city
-
 Write a report about the cultural aspects of Berlin
+
+# MCP User Messages
+
+Write a report about the population of Berlin and find an article about the city in the archives
+
+Write a report about the population of Berlin and list all the tools available in the TouristBureau of Berlin
+List all the tools available in the TouristBureau of Berlin
+List all the tools available in the TouristBureau in the city of Berlin
+
+# archived tests
+Write a report about the population of Berlin, and get a printable article about the city
+Write a report about the population of Berlin and find an article about the city in the archives
+
 ```
 
+### Deployment
 
 ```
 https://agentic-rag-360922367561.us-central1.run.app
