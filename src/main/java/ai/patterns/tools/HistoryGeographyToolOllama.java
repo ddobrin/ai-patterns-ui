@@ -38,10 +38,10 @@ public class HistoryGeographyToolOllama extends AbstractBase {
 
   @Tool("Search information in the database")
   TopicReport searchInformationInDatabase(String query) {
-    System.out.println(blue(">>> Invoking `searchInformation` tool with query: ") + query);
+    System.out.println(blue(">>> Invoking `searchInformation` tool with query - uses Gemma3 model: ") + query);
 
     TopicAssistant topicAssistant = AiServices.builder(TopicAssistant.class)
-        .chatLanguageModel(getChatLanguageModelOllama(ChatUtils.getDefaultChatOptions(Models.MODEL_GEMMA3_27B)))
+        .chatLanguageModel(getChatLanguageModelOllama(ChatUtils.getDefaultChatOptions(Models.MODEL_GEMMA3_4B)))
         .build();
 
     // augment with vector data if RAG is enabled
@@ -56,7 +56,7 @@ public class HistoryGeographyToolOllama extends AbstractBase {
             true,
             false,
             false,
-            Models.MODEL_GEMMA3_27B,
+            Models.MODEL_GEMMA3_4B,
             false,
             true,
             false,
@@ -89,7 +89,9 @@ public class HistoryGeographyToolOllama extends AbstractBase {
                                                 sources,
                                 false);
 
+    long start = System.currentTimeMillis();
     Result<String> reportResult = topicAssistant.report(finalUserMessage);
+    System.out.println("Call with Ollama and Gemma models(ms): " + (System.currentTimeMillis() - start));
 
     System.out.println(yellow("\n-> Topic report: ") + reportResult.content().replaceAll("\\n", "\n"));
 

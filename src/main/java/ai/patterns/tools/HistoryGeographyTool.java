@@ -90,9 +90,11 @@ public class HistoryGeographyTool extends AbstractBase {
                                                 sources,
                                 false);
 
+    long start = System.currentTimeMillis();
     Result<String> reportResult = topicAssistant.report(finalUserMessage);
 
     System.out.println(yellow("\n-> Topic report: ") + reportResult.content().replaceAll("\\n", "\n"));
+    System.out.println("Call with Gemini models(ms): " + (System.currentTimeMillis() - start));
 
     return new TopicReport(query, reportResult.content());
   }

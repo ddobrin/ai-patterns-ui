@@ -68,7 +68,7 @@ public abstract class AbstractBase {
     /** Create an Ollama chat model */
     protected ChatLanguageModel getChatLanguageModelOllama(final ChatOptions chatOptions) {
         return OllamaChatModel.builder()
-            .baseUrl("https://llama-service-model-preloaded-360922367561.us-central1.run.app")
+            .baseUrl("https://ollama-gemma4b-360922367561.us-central1.run.app")
             .modelName(chatOptions.model())
             .maxRetries(3)
             .timeout(Duration.ofSeconds(30))

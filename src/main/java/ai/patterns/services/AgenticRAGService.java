@@ -23,18 +23,18 @@ public class AgenticRAGService extends AbstractBase {
   // with multiple models, AI framework starters are not yet configured for supporting multiple models
   private Environment env;
   private HistoryGeographyTool historyGeographyTool;
-  // private HistoryGeographyToolOllama historyGeographyToolOllama;
+  private HistoryGeographyToolOllama historyGeographyToolOllama;
   private TouristBureauMCPTool touristBureauMCPTool;
   private final ChatMemoryProvider chatMemoryProvider;
 
   public AgenticRAGService(Environment env,
                            HistoryGeographyTool historyGeographyTool,
-                          // HistoryGeographyToolOllama historyGeographyToolOllama,
+                           HistoryGeographyToolOllama historyGeographyToolOllama,
                            TouristBureauMCPTool touristBureauMCPTool,
                            ChatMemoryProvider chatMemoryProvider){
     this.env = env;
     this.historyGeographyTool = historyGeographyTool;
-    //this.historyGeographyToolOllama = historyGeographyToolOllama;
+    this.historyGeographyToolOllama = historyGeographyToolOllama;
     this.touristBureauMCPTool = touristBureauMCPTool;
     this.chatMemoryProvider = chatMemoryProvider;
   }
