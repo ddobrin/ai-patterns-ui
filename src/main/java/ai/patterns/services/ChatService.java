@@ -100,7 +100,8 @@ public class ChatService extends AbstractBase {
     if(options.queryCompression()){
       steps.add("   1. Executing Query Compression for the Original Query: " +
           "_**" + userMessage.replaceAll("\n", " ").trim() + "**_");
-      userMessage = compressQuery(chatId, userMessage, chatMemory, getChatLanguageModel(options));
+      userMessage = compressQuery(chatId, userMessage, chatMemory, getChatLanguageModel(options))
+          .replaceAll("\n", " ");
 
       System.out.println(blue("\n>>> COMPRESSED QUERY:\n") + cyan(userMessage));
       steps.add("   1. Generated the Compressed Query: _**" + userMessage.trim() + "**_");
@@ -171,7 +172,7 @@ public class ChatService extends AbstractBase {
     }
 
     // only add the execution steps if there's actually at least one step to be displayed
-    if (!steps.isEmpty()) {
+    if (steps.isEmpty()) {
       steps.addFirst("* **Execution steps:**");
     }
 
