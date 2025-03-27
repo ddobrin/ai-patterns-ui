@@ -89,6 +89,12 @@
 			<version>${jackson.version}</version>
 		</dependency>
 
+		<!-- Cloud NLP API -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-language</artifactId>
+		</dependency>
+
 		<!-- Stemmer -->
 		<dependency>
 			<groupId>com.github.rholder</groupId>
@@ -268,6 +274,13 @@
 				<groupId>com.vaadin</groupId>
 				<artifactId>vaadin-bom</artifactId>
 				<version>${vaadin.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>26.56.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

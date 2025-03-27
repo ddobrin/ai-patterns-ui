@@ -7,6 +7,10 @@ import static ai.patterns.utils.RAGUtils.*;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.utils.ChatUtils.ChatOptions;
+import com.google.cloud.language.v2.ClassificationCategory;
+import com.google.cloud.language.v2.Document;
+import com.google.cloud.language.v2.LanguageServiceClient;
+import com.google.cloud.language.v2.ModerateTextResponse;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -17,11 +21,14 @@ import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -32,8 +39,7 @@ public class ChatService extends AbstractBase {
   private ChatAssistant assistant = null;
   private final Map<String, MessageWindowChatMemory> chatMemories = new ConcurrentHashMap<>();
 
-  // Create a chat memory instance for this specific chatId
-  MessageWindowChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
+  private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
   public ChatService(CapitalDataAccessDAO dataAccess) {
     this.dataAccess = dataAccess;
@@ -63,6 +69,12 @@ public class ChatService extends AbstractBase {
                              String userMessage,
                              String messageAttachments,
                              ChatOptions options) {
+
+    CompletableFuture<ModerateTextResponse> inputModerationFuture = null;
+    if (options.useGuardrails()) {
+      inputModerationFuture = moderate(userMessage);
+    }
+
     // Get or create chat memory for this specific chatId
     MessageWindowChatMemory chatMemory = chatMemories.computeIfAbsent(chatId,
         id -> MessageWindowChatMemory.withMaxMessages(10));
@@ -158,19 +170,61 @@ public class ChatService extends AbstractBase {
       sources = formatVectorSearchResults(capitalChunks);
     }
 
+    // only add the execution steps if there's actually at least one step to be displayed
+    if (!steps.isEmpty()) {
+      steps.addFirst("* **Execution steps:**");
+    }
+
     //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)
     String finalUserMessage = prepareUserMessage(userMessage,
         messageAttachments,
         additionalVectorData,
         sources,
-        steps.stream().collect(Collectors.joining("\n")),
+        String.join("\n", steps),
         options.showDataSources());
 
-    return assistant.stream(chatId, systemMessage, finalUserMessage)
-        .doOnNext(System.out::print)
-        .doOnComplete(() -> {
-          System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
-        });
+      String moderationReasons = "";
+      if (inputModerationFuture != null) {
+        try {
+          moderationReasons = inputModerationFuture.get().getModerationCategoriesList().stream()
+            .filter(classificationCategory -> classificationCategory.getConfidence() > 0.8)
+            .map(ClassificationCategory::getName)
+            .collect(Collectors.joining(", "));
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      if (options.useGuardrails() && !moderationReasons.isEmpty()) {
+        System.out.println(red(">>> FLAGGED: " + moderationReasons));
+
+        return Flux.just(
+            "❌ Your message was flagged for the following reasons: **" +
+            moderationReasons.trim() + "**");
+      } else {
+        return assistant.stream(chatId, systemMessage, finalUserMessage)
+          .doOnNext(System.out::print)
+          .doOnComplete(() -> {
+            System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
+          });
+      }
+  }
+
+  private static CompletableFuture<ModerateTextResponse> moderate(String msgToModerate) {
+    System.out.println(blue("\n>>> REQUESTING INPUT MODERATION:\n"));
+
+    return CompletableFuture.supplyAsync(() -> {
+      try (LanguageServiceClient language = LanguageServiceClient.create()) {
+        Document doc = Document.newBuilder()
+            .setContent(msgToModerate)
+            .setType(Document.Type.PLAIN_TEXT)
+            .build();
+
+        return language.moderateText(doc);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   interface ChatAssistant {

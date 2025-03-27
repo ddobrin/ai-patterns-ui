@@ -30,6 +30,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+/env.sh
 
 # Local .terraform directories
 **/.terraform/*
