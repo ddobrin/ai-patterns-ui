@@ -4,6 +4,7 @@ import static ai.patterns.utils.Ansi.cyan;
 import static ai.patterns.utils.Ansi.blue;
 
 import ai.patterns.base.AbstractBase;
+import ai.patterns.tools.CurrencyManagerTool;
 import ai.patterns.tools.HistoryGeographyTool;
 import ai.patterns.tools.HistoryGeographyToolOllama;
 import ai.patterns.tools.TouristBureauMCPTool;
@@ -23,19 +24,19 @@ public class AgenticRAGService extends AbstractBase {
   // with multiple models, AI framework starters are not yet configured for supporting multiple models
   private Environment env;
   private HistoryGeographyTool historyGeographyTool;
-  private HistoryGeographyToolOllama historyGeographyToolOllama;
   private TouristBureauMCPTool touristBureauMCPTool;
+  private CurrencyManagerTool currencyManagerTool;
   private final ChatMemoryProvider chatMemoryProvider;
 
   public AgenticRAGService(Environment env,
                            HistoryGeographyTool historyGeographyTool,
-                           HistoryGeographyToolOllama historyGeographyToolOllama,
                            TouristBureauMCPTool touristBureauMCPTool,
+                           CurrencyManagerTool currencyManagerTool,
                            ChatMemoryProvider chatMemoryProvider){
     this.env = env;
     this.historyGeographyTool = historyGeographyTool;
-    this.historyGeographyToolOllama = historyGeographyToolOllama;
     this.touristBureauMCPTool = touristBureauMCPTool;
+    this.currencyManagerTool = currencyManagerTool;
     this.chatMemoryProvider = chatMemoryProvider;
   }
 
@@ -64,7 +65,7 @@ public class AgenticRAGService extends AbstractBase {
     // create AIAssistant with a streaming model and tools enabled
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
-        .tools(historyGeographyTool, touristBureauMCPTool)
+        .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool)
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 

@@ -37,12 +37,16 @@ How many people live there?
 Write a report about the population of Berlin, its geographic situation, its historical origins. Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.
 ```
 
-UserMesage
+UserMessage
 ```
 Write a report about the population of Berlin
 
 Write a report about the population of Berlin, its geographic situation, and its historical origins
 Write a report about the cultural aspects of Berlin
+
+# Currency user messages
+What currency is used in the country of Germany?
+What currency is used in the country of Germany and what is the exchange rate from USD to that currency?
 
 # MCP User Messages
 
@@ -55,7 +59,6 @@ List all the tools available in the TouristBureau in the city of Berlin
 # archived tests
 Write a report about the population of Berlin, and get a printable article about the city
 Write a report about the population of Berlin and find an article about the city in the archives
-
 ```
 
 ### Deployment
