@@ -106,7 +106,7 @@
                 display: block;
             }
 
-            h4 + ul strong + ol li {
+            h4 + ul strong + ol li, h4 + ul p + ol li {
                 list-style: none;
                 border-left: 2px solid var(--lumo-success-color);
                 margin: 0.5em 0.5em 0.5em 0;
