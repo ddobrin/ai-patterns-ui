@@ -92,10 +92,22 @@ public class HistoryGeographyTool extends AbstractBase {
 
     long start = System.currentTimeMillis();
     Result<String> reportResult = topicAssistant.report(finalUserMessage);
-
     System.out.println(yellow("\n-> Topic report: ") + reportResult.content().replaceAll("\\n", "\n"));
     System.out.println("Call with Gemini models(ms): " + (System.currentTimeMillis() - start));
 
+    // include sources in the final report
+    // String topicReturn = String.format("""
+    //       %s
+    //
+    //       Please add at the end of your answer, the following content as-is, for reference purposes:
+    //
+    //       #### Sources
+    //
+    //       %s
+    //
+    //       """, reportResult.content(), sources);
+    //
+    // return new TopicReport(query, topicReturn);
     return new TopicReport(query, reportResult.content());
   }
 }
