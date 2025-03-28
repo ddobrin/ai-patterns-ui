@@ -47,6 +47,11 @@ Write a report about the cultural aspects of Berlin
 # Currency user messages
 What currency is used in the country of Germany?
 What currency is used in the country of Germany and what is the exchange rate from USD to that currency?
+Write a report about Berlin, including the currency in the country and the current exchange rate from the USD
+Tell me what the currency is in Germany and the last update of the exchange rate from the USD
+
+Write a report about the population of Berlin, its geographic situation, its historical origins, the currency in the country and the current exchange rate from the USD
+Write a report about the population of Berlin, its geographic situation, its historical origins, the currency in the country and the last update of the exchange rate from the USD
 
 # MCP User Messages
 

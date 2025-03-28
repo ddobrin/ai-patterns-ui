@@ -1,10 +1,16 @@
 package ai.patterns.tools;
 
 import static ai.patterns.utils.Ansi.blue;
+import static ai.patterns.utils.Models.MODEL_GEMINI_FLASH;
+import static ai.patterns.utils.Models.MODEL_GEMMA3_4B;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.data.TopicReport;
+import ai.patterns.tools.HistoryGeographyTool.TopicAssistant;
+import ai.patterns.utils.ChatUtils;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.Result;
 import dev.langchain4j.service.SystemMessage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +57,7 @@ public class CurrencyManagerTool extends AbstractBase {
     String getExchangeRates(String fromCurrency, String toCurrency);
 
     @SystemMessage(fromResource = "templates/currency-manager-system.txt")
-    String buildCurrencyReport(String userMessage);
+    Result<String> buildCurrencyReport(String userMessage);
   }
 
   @Tool("Get the currency for a country, by country name")
@@ -78,14 +84,20 @@ public class CurrencyManagerTool extends AbstractBase {
       System.out.println("Fetch exchange rates from online service(ms): " + (System.currentTimeMillis() - start));
     }
 
-    return new TopicReport("Exchange Rate",
-                          String.format("The exchange rate between currencies: 1 %s to 1 %s is set at %s. It has last been updated at %s",
-                              fromCurrency,
-                              toCurrency,
-                              exchangeRates.get(toCurrency),
-                              getLastUpdateTime()));
-  }
+    CurrencyManagerAssistant currencyAssistant = AiServices.builder(CurrencyManagerAssistant.class)
+        .chatLanguageModel(getChatLanguageModelOllama(ChatUtils.getDefaultChatOptions(MODEL_GEMMA3_4B)))
+        .build();
 
+    StringBuilder userMessage = new StringBuilder(String.format("What is the exchange rate from %s to %s?", fromCurrency, toCurrency));
+    userMessage.append(String.format("Use this helping information: The exchange rate between currencies: 1 %s to 1 %s is set at %s. It has last been updated at %s",
+            fromCurrency,
+            toCurrency,
+            exchangeRates.get(toCurrency),
+            getLastUpdateTime()));
+    Result<String> reportResult = currencyAssistant.buildCurrencyReport(userMessage.toString());
+
+    return new TopicReport("Exchange rate", reportResult.content());
+  }
 
   // Utility methods
   /**

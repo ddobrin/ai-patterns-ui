@@ -6,7 +6,6 @@ import static ai.patterns.utils.Ansi.blue;
 import ai.patterns.base.AbstractBase;
 import ai.patterns.tools.CurrencyManagerTool;
 import ai.patterns.tools.HistoryGeographyTool;
-import ai.patterns.tools.HistoryGeographyToolOllama;
 import ai.patterns.tools.TouristBureauMCPTool;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
