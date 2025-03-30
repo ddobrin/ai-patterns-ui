@@ -7,6 +7,7 @@ import ai.patterns.base.AbstractBase;
 import ai.patterns.tools.CurrencyManagerTool;
 import ai.patterns.tools.HistoryGeographyTool;
 import ai.patterns.tools.TouristBureauMCPTool;
+import ai.patterns.tools.WeatherForecastMCPTool;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.service.AiServices;
@@ -25,17 +26,20 @@ public class AgenticRAGService extends AbstractBase {
   private HistoryGeographyTool historyGeographyTool;
   private TouristBureauMCPTool touristBureauMCPTool;
   private CurrencyManagerTool currencyManagerTool;
+  private WeatherForecastMCPTool weatherForecastMCPTool;
   private final ChatMemoryProvider chatMemoryProvider;
 
   public AgenticRAGService(Environment env,
                            HistoryGeographyTool historyGeographyTool,
                            TouristBureauMCPTool touristBureauMCPTool,
                            CurrencyManagerTool currencyManagerTool,
+                           WeatherForecastMCPTool weatherForecastMCPTool,
                            ChatMemoryProvider chatMemoryProvider){
     this.env = env;
     this.historyGeographyTool = historyGeographyTool;
     this.touristBureauMCPTool = touristBureauMCPTool;
     this.currencyManagerTool = currencyManagerTool;
+    this.weatherForecastMCPTool = weatherForecastMCPTool;
     this.chatMemoryProvider = chatMemoryProvider;
   }
 
@@ -45,7 +49,7 @@ public class AgenticRAGService extends AbstractBase {
                           ChatOptions options) {
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
         .chatLanguageModel(getChatLanguageModel(options))
-        .tools(historyGeographyTool, touristBureauMCPTool)
+        .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool, weatherForecastMCPTool)
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 
@@ -64,7 +68,7 @@ public class AgenticRAGService extends AbstractBase {
     // create AIAssistant with a streaming model and tools enabled
     AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
-        .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool)
+        .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool, weatherForecastMCPTool)
         .chatMemoryProvider(chatMemoryProvider)
         .build();
 

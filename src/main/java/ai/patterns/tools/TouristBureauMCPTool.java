@@ -49,8 +49,8 @@ public class TouristBureauMCPTool extends AbstractBase {
   // }
 
   @Tool("List tools available in TouristBureau server")
-  TopicReport listToolsInTouristBureau(String city) throws Exception {
-    System.out.println(blue(">>> Invoking `listToolsInTouristBureau` tool with city: ") + city);
+  TopicReport listToolsInTouristBureau(String capital) throws Exception {
+    System.out.println(blue(">>> Invoking `listToolsInTouristBureau` tool with city: ") + capital);
 
     // Use NPX
     McpTransport transport = new StdioMcpTransport.Builder()
@@ -73,10 +73,10 @@ public class TouristBureauMCPTool extends AbstractBase {
       toolList.add(("  * **Description:** \n") + tool.description());
       toolList.add(("  * **Parameters:** \n"));
       tool.parameters().properties()
-          .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
+          .forEach((key, value) -> toolList.add("    * "  + key + ": " + value + "\n"));
     });
 
-    return new TopicReport(city, toolList.stream().collect(Collectors.joining("\n")));
+    return new TopicReport(capital, toolList.stream().collect(Collectors.joining("\n")));
   }
 
   @Tool("Find article in the Archives")

@@ -102,6 +102,17 @@
 			<version>${snowball.version}</version>
 		</dependency>
 
+		<!-- ModelContextProtocol -->
+		<dependency>
+			<groupId>io.modelcontextprotocol.sdk</groupId>
+			<artifactId>mcp</artifactId>
+		</dependency>
+		<!-- Spring WebMVC-based SSE server transport -->
+		<dependency>
+			<groupId>io.modelcontextprotocol.sdk</groupId>
+			<artifactId>mcp-spring-webmvc</artifactId>
+		</dependency>
+
 		<!-- LANGCHAIN4j -->
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
@@ -281,6 +292,13 @@
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
 				<version>26.56.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.modelcontextprotocol.sdk</groupId>
+				<artifactId>mcp-bom</artifactId>
+				<version>0.8.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

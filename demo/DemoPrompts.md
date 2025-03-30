@@ -69,6 +69,7 @@ UserMessage
 Write a report about the population of Berlin
 
 Write a report about the population of Berlin, its geographic situation, and its historical origins
+Write a report about the population of Berlin, its geographic situation, its historical origins and get the current temperature
 Write a report about the cultural aspects of Berlin
 
 # Currency user messages
@@ -87,6 +88,14 @@ Write a report about the population of Berlin and find an article about the city
 Write a report about the population of Berlin and list all the tools available in the TouristBureau of Berlin
 List all the tools available in the TouristBureau of Berlin
 List all the tools available in the TouristBureau in the city of Berlin
+
+# List MCP tools
+List all the tools available to you 
+List all the tools available in the TouristBureau of Berlin
+List all the tools available in the WeatherForecast for Berlin
+
+Get the temperature for Berlin
+Get the temperature for the capital with latitude 52.52437 and longitude 13.41053
 
 # archived tests
 Write a report about the population of Berlin, and get a printable article about the city
