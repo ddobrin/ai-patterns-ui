@@ -150,7 +150,7 @@ export default function AiPatterns() {
           <h3>Retrieval Methods</h3>
           <div className="vertical-checkboxes">
             <Checkbox label="Query compression" {...field(model.queryCompression) } />
-            <Checkbox label="Query routing" {...field(model.queryRouting) } />
+            <Checkbox label="Query routing (with external web search)" {...field(model.queryRouting) } />
             <Checkbox label="Hypothetical Document Embedding" {...field(model.hyde) } />
             <Checkbox label="Reranking" {...field(model.reranking) } />
           </div>

@@ -23,12 +23,17 @@ import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+import dev.langchain4j.web.search.WebSearchOrganicResult;
+import dev.langchain4j.web.search.WebSearchRequest;
+import dev.langchain4j.web.search.WebSearchResults;
+import dev.langchain4j.web.search.tavily.TavilyWebSearchEngine;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -122,8 +127,42 @@ public class ChatService extends AbstractBase {
     // augment with vector data if RAG is enabled
     // no RAG? ok
     List<CapitalDataAccessDAO.CapitalChunkRow> capitalChunks = new ArrayList<>();
-    String additionalVectorData = "";
+    String llmDataAugmentation = "";
     String sources = "";
+
+    // Use query routing, to do an external web search
+    // potentially in addition to RAG search
+    if (options.queryRouting()) {
+      TavilyWebSearchEngine webSearchEngine = TavilyWebSearchEngine.builder()
+          .apiKey(System.getenv("TAVILY_API_KEY"))
+          .build();
+
+      WebSearchResults searchResults = webSearchEngine.search(WebSearchRequest.builder()
+          .searchTerms(userMessage)
+          .build());
+
+      steps.add("   1. Query Routing to web search; results: **" + searchResults.results().size() + "**");
+
+      System.out.println(blue("\n>>> WEBSEARCH RESULTS:\n"));
+
+      StringBuilder searchItem = new StringBuilder();
+      searchResults.results().forEach(r -> {
+        System.out.println(cyan(r.title()) + "\n" +
+                green(URLDecoder.decode(r.url().toASCIIString())) + "\n" +
+                r.snippet());
+
+        searchItem.append(String.format("""
+                * [%s](%s)
+                    > %s
+            """, r.title(), URLDecoder.decode(r.url().toASCIIString()), r.snippet()));
+      });
+
+      llmDataAugmentation += searchResults.results().stream()
+          .map(WebSearchOrganicResult::snippet)
+          .collect(Collectors.joining("\n"));
+
+      sources += "* **Search results:**\n" + searchItem;
+    }
 
     if (options.enableRAG()) {
       capitalChunks = augmentWithVectorDataList(userMessage,
@@ -163,12 +202,12 @@ public class ChatService extends AbstractBase {
       }
 
       // format RAG data to send to LLM
-      additionalVectorData = capitalChunks.stream()
+      llmDataAugmentation += capitalChunks.stream()
           .map(CapitalDataAccessDAO.CapitalChunkRow::getChunk)
           .collect(Collectors.joining("\n"));
 
       // format sources in returnable format
-      sources = formatVectorSearchResults(capitalChunks);
+      sources += formatVectorSearchResults(capitalChunks);
     }
 
     // only add the execution steps if there's actually at least one step to be displayed
@@ -179,7 +218,7 @@ public class ChatService extends AbstractBase {
     //  prepare final UserMessage including original UserMessage, attachments, vector data (if available)
     String finalUserMessage = prepareUserMessage(userMessage,
         messageAttachments,
-        additionalVectorData,
+        llmDataAugmentation,
         sources,
         String.join("\n", steps),
         options.showDataSources());
