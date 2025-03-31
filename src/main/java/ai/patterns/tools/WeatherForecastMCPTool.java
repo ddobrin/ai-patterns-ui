@@ -100,7 +100,7 @@ public class WeatherForecastMCPTool extends AbstractBase {
     System.out.println(
         blue(">>> Invoking `getTemperatureByCoordinates` tool with latitude and longitude"));
 
-    var transport = new HttpClientSseClientTransport("http://localhost:8083");
+    var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
     var mcpClient = McpClient.sync(transport).build();
 
     mcpClient.initialize();
