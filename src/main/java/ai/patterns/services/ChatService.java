@@ -6,6 +6,7 @@ import static ai.patterns.utils.RAGUtils.*;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
+import ai.patterns.utils.ChatUtils;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import com.google.cloud.language.v2.ClassificationCategory;
 import com.google.cloud.language.v2.Document;

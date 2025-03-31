@@ -31,7 +31,7 @@ public class WeatherForecastMCPTool extends AbstractBase {
   TopicReport listToolsInWeatherForecast(String capital) throws Exception {
     System.out.println(blue(">>> Invoking `listToolsInWeatherForecast` tool with capital: ") + capital);
 
-    var transport = new HttpClientSseClientTransport("http://localhost:8083");
+    var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
     var mcpClient = McpClient.sync(transport).build();
 
     mcpClient.initialize();

@@ -71,7 +71,7 @@ const defaultOptions: ChatOptions = {
   useGuardrails: false,
   evaluateResponse: false,
   chunkingType: ChunkingType.NONE,
-  filtering: false,
+  filtering: true,
   queryCompression: false,
   queryRouting: false,
   hyde: false,

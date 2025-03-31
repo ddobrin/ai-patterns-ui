@@ -1,7 +1,5 @@
 package ai.patterns.utils;
 
-import static java.util.Locale.filter;
-
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -52,10 +50,17 @@ public class RAGUtils {
       String userMessage,
       ChatOptions options,
       CapitalDataAccessDAO dataAccess) {
+    // handle the case when RAG is enabled in the UI
+    // but no Chunking method has been selected
+    String chunkingType = (options.chunkingType().name().equals(ChatUtils.ChunkingType.NONE.name()) ?
+          ChatUtils.ChunkingType.HIERARCHICAL.name() :
+          options.chunkingType().name())
+              .toLowerCase();
+
     // search the vector store by query and embedding type !
     List<CapitalDataAccessDAO.CapitalChunkRow> vectorData = dataAccess.searchEmbeddings(
         userMessage,
-        options.chunkingType().name().toLowerCase(),
+        chunkingType,
         options.filtering() ? options.capital() : null,
         options.filtering() ? options.continent() : null);
 
