@@ -13,11 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.springframework.ai.mcp.sample.client;
+package mcp.weather.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpSchema.Content;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 import java.io.BufferedReader;

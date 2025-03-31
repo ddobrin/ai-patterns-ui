@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.springframework.ai.mcp.sample.client;
+package mcp.weather.server;
 
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 
