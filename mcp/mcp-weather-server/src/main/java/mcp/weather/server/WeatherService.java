@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.springframework.ai.mcp.sample.server;
+package mcp.weather.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
