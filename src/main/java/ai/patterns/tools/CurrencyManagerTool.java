@@ -102,7 +102,7 @@ public class CurrencyManagerTool extends AbstractBase {
         .build();
 
     StringBuilder userMessage = new StringBuilder(String.format("What is the exchange rate from %s to %s?", fromCurrency, toCurrency));
-    userMessage.append(String.format("Use this helping information: The exchange rate between currencies: 1 %s to 1 %s is set at %s. It has last been updated at %s",
+    userMessage.append(String.format("Use this helping information: The exchange rate between currencies: %s to %s is set at %s. It has last been updated at %s",
             fromCurrency,
             toCurrency,
             exchangeRates.get(toCurrency),
