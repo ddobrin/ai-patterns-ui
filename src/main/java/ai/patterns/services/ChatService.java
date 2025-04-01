@@ -21,6 +21,8 @@ import static ai.patterns.utils.RAGUtils.*;
 
 import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
+import ai.patterns.tools.CurrencyManagerTool;
+import ai.patterns.tools.WeatherForecastMCPTool;
 import ai.patterns.utils.ChatUtils;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import com.google.cloud.language.v2.ClassificationCategory;
@@ -57,13 +59,20 @@ import reactor.core.publisher.Flux;
 public class ChatService extends AbstractBase {
 
   private final CapitalDataAccessDAO dataAccess;
+  private final CurrencyManagerTool currencyManagerTool;
+  private final WeatherForecastMCPTool weatherForecastMCPTool;
+
   private ChatAssistant assistant = null;
   private final Map<String, MessageWindowChatMemory> chatMemories = new ConcurrentHashMap<>();
 
   private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-  public ChatService(CapitalDataAccessDAO dataAccess) {
+  public ChatService(CapitalDataAccessDAO dataAccess,
+                     CurrencyManagerTool currencyManagerTool,
+                     WeatherForecastMCPTool weatherForecastMCPTool) {
     this.dataAccess = dataAccess;
+    this.currencyManagerTool = currencyManagerTool;
+    this.weatherForecastMCPTool = weatherForecastMCPTool;
   }
 
   public String chat(String chatId,
@@ -74,6 +83,7 @@ public class ChatService extends AbstractBase {
     if(assistant == null) {
       assistant = AiServices.builder(ChatService.ChatAssistant.class)
           .chatLanguageModel(getChatLanguageModel(options))
+          .tools(currencyManagerTool, weatherForecastMCPTool)
           .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
           .build();
     }
@@ -108,6 +118,7 @@ public class ChatService extends AbstractBase {
     // build an AIAssistant with a streaming model and memory
     assistant = AiServices.builder(ChatService.ChatAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
+        .tools(currencyManagerTool, weatherForecastMCPTool)
         .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
                   memoryId,
                   MessageWindowChatMemory.withMaxMessages(10)))
