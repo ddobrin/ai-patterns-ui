@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package mcp.weather.server;
+package mcp.file.server;
 
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 
