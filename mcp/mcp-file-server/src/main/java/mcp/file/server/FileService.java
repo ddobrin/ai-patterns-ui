@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -43,7 +44,9 @@ import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.model.ModelOptionsUtils;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -62,9 +65,15 @@ public class FileService {
 
     try {
 			System.out.println("Reading file from the Archive for capital: " + capital);
-			File file = new File(String.format("src/main/resources/capitals/%s_article.txt", capital));
 
-      return Files.lines(file.toPath()).collect(Collectors.joining("\n"));
+			String data = String.format("File not found in the archive for capital %s", capital);
+			ClassPathResource resource = new ClassPathResource(String.format("capitals/%s_article.txt", capital));
+			try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+				data = FileCopyUtils.copyToString(reader);
+			}
+
+			System.out.println("File content: " + data.substring(0, Math.min(data.length(), 250)));
+      return data;
     } catch (IOException e) {
       return "No article found in the Archive";
     }
