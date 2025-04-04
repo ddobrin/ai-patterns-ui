@@ -37,12 +37,18 @@ Think step by step:
 Write a report about the population of Berlin, its geographic situation, and its historical origins
 ```
 
-## Ollama calls
+## Ollama calls - avoid EUR
 ```shell
-What currency is used in the country of Germany and what is the exchange rate from USD to that currency?
+Tell me what the currency is in Japan and the latest update of the exchange rate from the USD to that currency
+Tell me what the currency is in China and the latest update of the exchange rate from the USD to that currency
 ```
 
 ## MCP Calls
 ```shell
+List all the tools available in the TouristBureau of Berlin
 List all the tools available in the WeatherForecast for Berlin
+
+Get the temperature for Berlin
+What is the temperaturn in Berlin
+Write a report about the population of Berlin and find an article about the city in the archives
 ```

@@ -23,6 +23,7 @@ public class ChatUtils {
   public static @NotNull ChatOptions getDefaultChatOptions(String model) {
       @Nullable ChatUtils.@Nullable ChatOptions options;
       return new ChatOptions("",
+          false,
           true,
           false,
           false,
@@ -54,6 +55,7 @@ public class ChatUtils {
 
   public record ChatOptions(
       String systemMessage,
+      boolean useTools,
       boolean useVertex,
       boolean useAgents,
       boolean useWebsearch,

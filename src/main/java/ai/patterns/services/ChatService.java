@@ -23,7 +23,6 @@ import ai.patterns.base.AbstractBase;
 import ai.patterns.dao.CapitalDataAccessDAO;
 import ai.patterns.tools.CurrencyManagerTool;
 import ai.patterns.tools.WeatherForecastMCPTool;
-import ai.patterns.utils.ChatUtils;
 import ai.patterns.utils.ChatUtils.ChatOptions;
 import com.google.cloud.language.v2.ClassificationCategory;
 import com.google.cloud.language.v2.Document;
@@ -80,13 +79,15 @@ public class ChatService extends AbstractBase {
                     String userMessage,
                     String messageAttachments,
                     ChatOptions options) {
-    if(assistant == null) {
-      assistant = AiServices.builder(ChatService.ChatAssistant.class)
-          .chatLanguageModel(getChatLanguageModel(options))
-          .tools(currencyManagerTool, weatherForecastMCPTool)
-          .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-          .build();
-    }
+    AiServices<ChatService.ChatAssistant> builder = AiServices.builder(ChatService.ChatAssistant.class)
+        .chatLanguageModel(getChatLanguageModel(options))
+        // .tools(currencyManagerTool, weatherForecastMCPTool)
+        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10));
+
+    if(options.useTools())
+      builder.tools(currencyManagerTool, weatherForecastMCPTool);
+
+    assistant = builder.build();
 
     String report = assistant.chat(chatId, systemMessage, userMessage);
 
@@ -116,17 +117,19 @@ public class ChatService extends AbstractBase {
     }
 
     // build an AIAssistant with a streaming model and memory
-    assistant = AiServices.builder(ChatService.ChatAssistant.class)
+    AiServices<ChatService.ChatAssistant> builder = AiServices.builder(ChatService.ChatAssistant.class)
         .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
-        .tools(currencyManagerTool, weatherForecastMCPTool)
         .chatMemoryProvider(memoryId -> chatMemories.getOrDefault(
                   memoryId,
-                  MessageWindowChatMemory.withMaxMessages(10)))
-        .build();
+                  MessageWindowChatMemory.withMaxMessages(10)));
+
+        if(options.useTools())
+          builder.tools(currencyManagerTool, weatherForecastMCPTool);
+
+    assistant = builder.build();
 
     // collect execution steps
     List<String> steps = new ArrayList<>();
-    steps.add("* **Execution steps:**");
 
     // compress the query if required
     if(options.queryCompression()){
@@ -238,7 +241,7 @@ public class ChatService extends AbstractBase {
     }
 
     // only add the execution steps if there's actually at least one step to be displayed
-    if (steps.isEmpty()) {
+    if (!steps.isEmpty()) {
       steps.addFirst("* **Execution steps:**");
     }
 

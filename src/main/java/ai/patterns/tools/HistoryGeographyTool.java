@@ -70,6 +70,7 @@ public class HistoryGeographyTool extends AbstractBase {
         query,
         new ChatOptions("",
             true,
+            true,
             false,
             false,
             Models.MODEL_GEMINI_FLASH,

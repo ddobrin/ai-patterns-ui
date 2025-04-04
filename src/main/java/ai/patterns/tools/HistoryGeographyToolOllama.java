@@ -68,6 +68,7 @@ public class HistoryGeographyToolOllama extends AbstractBase {
     vectorDataList = augmentWithVectorDataList(
         query,
         new ChatOptions("",
+            false,
             true,
             false,
             false,
