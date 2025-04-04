@@ -12,9 +12,9 @@ import ChatOptionsModel from "Frontend/generated/ai/patterns/utils/ChatUtils/Cha
 import {Checkbox, ComboBox, TextArea, RadioGroup, RadioButton, Button, Icon, Tooltip} from "@vaadin/react-components";
 
 const models = [
+  'gemini-2.5-pro-exp-03-25',
   'gemini-2.0-flash-001',
-  'gemini-2.0-flash-thinking-exp-01-21',
-  'gemini-2.0-flash-exp',
+  'gemini-2.0-flash',
   'gemini-1.5-pro-002'
 ];
 
