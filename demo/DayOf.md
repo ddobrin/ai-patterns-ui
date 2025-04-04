@@ -1,6 +1,6 @@
 ## First demo
 ```shell
-What is the capital of France?
+What is the capital of France? How many people live there
 ```
 ```shell
 Who won most medals at the Paris Olympics in 2024?
@@ -17,9 +17,6 @@ What's the capital of Germany?
 How many people live there?
 ```
 
-
-
-
 ## Agents
 UserMessage
 ```shell
@@ -34,7 +31,27 @@ Think step by step:
 ```
 
 ```shell
-Write a report about the population of Berlin, its geographic situation, and its historical origins
+Write a report about the population of Berlin, its geographic situation, its historical origins and find an article about Berlin in the archives.
+
+Can you find out what the current temperature in Berlin is?
+
+Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.
+```
+```shell
+Write a report about the population of Berlin, its geographic situation, its historical origins and 
+please find an article about Berlin in the archives.
+```
+```shell
+List all the tools available in the TouristBureau of Berlin
+```
+```shell
+List all the tools available in the WeatherForecast for Berlin
+```
+
+```
+Write a report about the population of Berlin, its geographic situation, its historical origins,
+the currency used in the country of Germany and the current exchange rate from USD to that currency?
+Please find an article about Berlin in the archives.
 ```
 
 ## Ollama calls - avoid EUR

@@ -61,7 +61,11 @@ How many people live there?
 
 #### Planning UserMessage
 ```
-Write a report about the population of Berlin, its geographic situation, its historical origins. Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.
+Write a report about the population of Berlin, its geographic situation, its historical origins,
+the currency used in the country of Germany and the current exchange rate from USD to that currency?
+Please find an article about Berlin in the archives.
+
+Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.
 ```
 
 UserMessage
