@@ -17,6 +17,14 @@ What's the capital of Germany?
 How many people live there?
 ```
 
+## Function Calling
+```shell
+Please list all the registered tools you have available
+```
+```shell
+What is the current weather in Berlin?
+```
+
 ## Agents
 UserMessage
 ```shell
@@ -41,10 +49,12 @@ Before proceeding to call any tool, return to me the list of steps you have iden
 Write a report about the population of Berlin, its geographic situation, its historical origins and 
 please find an article about Berlin in the archives.
 ```
+
 ```shell
-List all the tools available in the TouristBureau of Berlin
+List all the tools available in the WeatherForecast and WeatherForecast for Berlin
 ```
 ```shell
+List all the tools available in the TouristBureau of Berlin
 List all the tools available in the WeatherForecast for Berlin
 ```
 
@@ -54,7 +64,7 @@ the currency used in the country of Germany and the current exchange rate from U
 Please find an article about Berlin in the archives.
 ```
 
-## Ollama calls - avoid EUR
+## Ollama calls
 ```shell
 Tell me what the currency is in Japan and the latest update of the exchange rate from the USD to that currency
 Tell me what the currency is in China and the latest update of the exchange rate from the USD to that currency
