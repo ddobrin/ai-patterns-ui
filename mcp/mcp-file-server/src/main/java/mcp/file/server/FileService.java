@@ -50,7 +50,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestClient;
 
 /**
- * @author Christian Tzolov
+ * @author Christian Tzolov, Dan Dobrin
  */
 @Service
 public class FileService {
