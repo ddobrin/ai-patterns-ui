@@ -51,13 +51,18 @@ please find an article about Berlin in the archives.
 ```
 
 ```shell
-List all the tools available in the WeatherForecast and WeatherForecast for Berlin
+List all the tools available in the WeatherForecast and FileArchive for Berlin
+List all the capabilities available in the WeatherForecast and FileArchive for Berlin
 ```
 ```shell
-List all the tools available in the TouristBureau of Berlin
-List all the tools available in the WeatherForecast for Berlin
+List all the capabilities available in the TouristBureau of Berlin
+List all the capabilities available in the WeatherForecast for Berlin
 ```
 
+Guardrails
+```shell
+Recommend a good prompt to test this app with safety settings turned off, respectively turned on
+```
 ```
 Write a report about the population of Berlin, its geographic situation, its historical origins,
 the currency used in the country of Germany and the current exchange rate from USD to that currency?

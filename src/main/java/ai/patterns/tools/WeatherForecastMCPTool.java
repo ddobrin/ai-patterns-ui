@@ -27,6 +27,8 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.ListToolsResult;
+import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
+import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.ToolCapabilities;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -42,9 +44,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class WeatherForecastMCPTool extends AbstractBase {
 
-  @Tool("List tools available in WeatherForecast server")
-  TopicReport listToolsInWeatherForecast(String capital) throws Exception {
-    System.out.println(blue(">>> Invoking `listToolsInWeatherForecast` tool with capital: ") + capital);
+  @Tool("List capabilities available in WeatherForecast server")
+  TopicReport listCapabilitiesInWeatherForecast(String capital) throws Exception {
+    System.out.println(blue(">>> Invoking `listCapabilitiesInWeatherForecast` tool with capital: ") + capital);
 
     var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
     var mcpClient = McpClient.sync(transport).build();
@@ -52,8 +54,12 @@ public class WeatherForecastMCPTool extends AbstractBase {
     mcpClient.initialize();
     mcpClient.ping();
 
+    ServerCapabilities capabilities = mcpClient.getServerCapabilities();
+    if(capabilities == null)
+      return new TopicReport(capital, "No capabilities available for the WeatherForecast MCP Server");
+
     // List the available MCP tools
-    ListToolsResult toolsList = mcpClient.listTools();
+    ToolCapabilities toolsList = capabilities.tools();
 
     List<String> toolList = new ArrayList();
     // Pretty print available tools
@@ -64,6 +70,24 @@ public class WeatherForecastMCPTool extends AbstractBase {
       tool.inputSchema().properties()
           .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
     });
+
+    if(capabilities.prompts() == null){
+      toolList.add(("* **Prompt:** ") + "No prompts available for the WeatherForecast MCP Server");
+    } else {
+      mcpClient.listPrompts().prompts().forEach(prompt -> {
+        toolList.add(("* **Prompt:** \n") + prompt.name());
+        toolList.add(("  * **Description:** \n") + prompt.description());
+
+        prompt.arguments().forEach(arg -> {
+          String requiredText = arg.required() ? "(Required)" : "(Optional)";
+          toolList.add("    * " + arg.name() + " " + requiredText + ": " + arg.description());
+        });
+      });
+    };
+
+    if(capabilities.resources() == null){
+      toolList.add(("* **Resources:** \n") + "No resources available for the WeatherForecast MCP Server");
+    }
 
     // close  the client gracefully
     mcpClient.closeGracefully();

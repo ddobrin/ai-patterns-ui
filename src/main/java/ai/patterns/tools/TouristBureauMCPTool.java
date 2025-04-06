@@ -26,6 +26,8 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.ListToolsResult;
+import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
+import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.ToolCapabilities;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +37,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TouristBureauMCPTool extends AbstractBase {
 
-  @Tool("List tools available in TouristBureau server")
-  TopicReport listToolsInFileArchive(String capital) throws Exception {
-    System.out.println(blue(">>> Invoking `listToolsInFileArchive` tool with capital: ") + capital);
+  @Tool("List capabilities available in TouristBureau server")
+  TopicReport listCapabilitiesInFileArchive(String capital) throws Exception {
+    System.out.println(blue(">>> Invoking `listCapabilitiesInFileArchive` tool with capital: ") + capital);
 
     var transport = new HttpClientSseClientTransport(System.getenv("MCP_FILE_SERVER"));
     var mcpClient = McpClient.sync(transport).build();
@@ -45,8 +47,12 @@ public class TouristBureauMCPTool extends AbstractBase {
     mcpClient.initialize();
     mcpClient.ping();
 
+    ServerCapabilities capabilities = mcpClient.getServerCapabilities();
+    if(capabilities == null)
+      return new TopicReport(capital, "No capabilities available for the TouristBureau MCP Server");
+
     // List the available MCP tools
-    ListToolsResult toolsList = mcpClient.listTools();
+    ToolCapabilities toolsList = capabilities.tools();
 
     List<String> toolList = new ArrayList();
     // Pretty print available tools
@@ -57,6 +63,24 @@ public class TouristBureauMCPTool extends AbstractBase {
       tool.inputSchema().properties()
           .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
     });
+
+    if(capabilities.prompts() == null){
+      toolList.add(("* **Prompt:** ") + "No prompts available for the TouristBureau MCP Server");
+    } else {
+      mcpClient.listPrompts().prompts().forEach(prompt -> {
+        toolList.add(("* **Prompt:** \n") + prompt.name());
+        toolList.add(("  * **Description:** \n") + prompt.description());
+
+        prompt.arguments().forEach(arg -> {
+          String requiredText = arg.required() ? "(Required)" : "(Optional)";
+          toolList.add("    * " + arg.name() + " " + requiredText + ": " + arg.description());
+        });
+      });
+    };
+
+    if(capabilities.resources() == null){
+      toolList.add(("* **Resources:** \n") + "No resources available for the TouristBureau MCP Server");
+    }
 
     // close  the client gracefully
     mcpClient.closeGracefully();
