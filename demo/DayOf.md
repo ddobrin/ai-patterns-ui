@@ -10,12 +10,18 @@ Who won most medals at the Paris Olympics in 2024?
 ```shell
 Write a report about the population of Berlin
 ```
-Hypothetical Document Embedding
+Hierarchical ++ HyDE ++ Ranking ++ Query compression
+```shell
+What is the capital of Germany?
+Tell me about the geography of the city
 ```
-What's the capital of Germany?
+Contextual ++ reranking + query compression
+```
+What is the capital of Germany?
+Tell me about the geography of the city
+```
 
-How many people live there?
-```
+Context
 
 ## Function Calling
 ```shell
@@ -36,6 +42,12 @@ Think step by step:
 2) For each topic, devise a list of questions corresponding to those topics  
 3) Search those questions in the database  
 4) Collect all those answers together, and create the final report. 
+```
+
+```shell
+Write a report about the population of Berlin, its geographic situation, its historical origins.
+
+Before proceeding to call any tool, return to me the list of steps you have identified and the list of questions you want to ask the tools available to you.
 ```
 
 ```shell
@@ -63,6 +75,11 @@ Guardrails
 ```shell
 Recommend a good prompt to test this app with safety settings turned off, respectively turned on
 ```
+```
+Generate a detailed report on the history of Baghdad, focusing specifically on periods of invasion, conflict, and political instability throughout its existence, including recent events.
+```
+
+Agents with calls into Cloud Run deployed models
 ```
 Write a report about the population of Berlin, its geographic situation, its historical origins,
 the currency used in the country of Germany and the current exchange rate from USD to that currency?
