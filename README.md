@@ -1,12 +1,17 @@
 # AI Patterns w/UI front-end
-#### Agent UI Application, run locally or deploy to Cloud Run in Serverless GCP, w/GPU support
+#### Agent RAG UI Application, run locally or deploy to Cloud Run in Serverless GCP, w/GPU support
 
+## App in action
+![Application Output](images/UI-app.png)
+
+## App Architecture
 ![ArchAgentUI.png](images/ArchAgentUI.png)
 
 ### Database
-Create an instance of the AlloyDB database with [Database DDL](data/tables.ddl)
+* Create an AlloyDB database in GCP - [Instructions](https://cloud.google.com/alloydb/docs/database-create)
+* Create an instance of the AlloyDB database with the following [Database DDL](data/tables.ddl)
 
-Developer note: use the AlloyDB proxy to run from your own development environment - [instructions](data/Database.md)
+**Developer note:** use the AlloyDB proxy to run from your own development environment - [instructions](data/Database.md)
 
 ### Dependent Services
 * MCP Servers

@@ -15,7 +15,7 @@
  # Location = us-central1
  
  # Start with
- ./alloydb-auth-proxy projects/genai-playground24/locations/us-central1/clusters/alloydb-aip-01/instances/alloydb-aip-01-pr --public-ip
+ ./alloydb-auth-proxy projects/<project_name>/locations/us-central1/clusters/alloydb-aip-01/instances/alloydb-aip-01-pr --public-ip
 
 #--- connectivity checks ---
 # Start psql for connectivity check
