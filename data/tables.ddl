@@ -7,6 +7,10 @@ DROP TABLE IF EXISTS continents;
 DROP TABLE IF EXISTS capitals;
 DROP TYPE IF EXISTS embed_type;
 
+-- Install the vector and alloydb_scann extensions:
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS alloydb_scann;
+
 -- Create enum type for embedding types
 CREATE TYPE embed_type AS ENUM ('hierarchical', 'hypothetical', 'contextual', 'late');
 
@@ -73,7 +77,7 @@ VALUES
     ((SELECT capital_id FROM capitals WHERE capital = 'Ankara'),
      'hypothetical', 'Geographical content about Ankara...', 'Ankara is located in central Anatolia and has a continental climate...'),
     ((SELECT capital_id FROM capitals WHERE capital = 'Ankara'),
-     'contextual', 'Cultural content about Ankara...', 'The culture of Ankara reflects its position as Turkey's capital...');
+     'contextual', 'Cultural content about Ankara...', 'The culture of Ankara reflects its position as Turkey''s capital...');
 
 -- Example SELECT to retrieve a capital with all its chunks and continents
 SELECT

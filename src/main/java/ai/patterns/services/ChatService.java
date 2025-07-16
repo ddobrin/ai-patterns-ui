@@ -38,6 +38,9 @@ import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -60,6 +63,7 @@ public class ChatService extends AbstractBase {
   private final CapitalDataAccessDAO dataAccess;
   private final CurrencyManagerTool currencyManagerTool;
   private final WeatherForecastMCPTool weatherForecastMCPTool;
+  private final Tracer tracer;
 
   private ChatAssistant assistant = null;
   private final Map<String, MessageWindowChatMemory> chatMemories = new ConcurrentHashMap<>();
@@ -68,10 +72,12 @@ public class ChatService extends AbstractBase {
 
   public ChatService(CapitalDataAccessDAO dataAccess,
                      CurrencyManagerTool currencyManagerTool,
-                     WeatherForecastMCPTool weatherForecastMCPTool) {
+                     WeatherForecastMCPTool weatherForecastMCPTool,
+                     Tracer tracer) {
     this.dataAccess = dataAccess;
     this.currencyManagerTool = currencyManagerTool;
     this.weatherForecastMCPTool = weatherForecastMCPTool;
+    this.tracer = tracer;
   }
 
   public String chat(String chatId,
@@ -79,21 +85,39 @@ public class ChatService extends AbstractBase {
                     String userMessage,
                     String messageAttachments,
                     ChatOptions options) {
-    AiServices<ChatService.ChatAssistant> builder = AiServices.builder(ChatService.ChatAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(options))
-        // .tools(currencyManagerTool, weatherForecastMCPTool)
-        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10));
+    Span span = tracer.spanBuilder("ChatService.chat")
+        .setAttribute("chat.id", chatId)
+        .setAttribute("chat.model", options.model())
+        .setAttribute("tools.enabled", options.useTools())
+        .startSpan();
 
-    if(options.useTools())
-      builder.tools(currencyManagerTool, weatherForecastMCPTool);
+    try (Scope scope = span.makeCurrent()) {
+      span.addEvent("Building AI Assistant");
+      AiServices<ChatService.ChatAssistant> builder = AiServices.builder(ChatService.ChatAssistant.class)
+          .chatLanguageModel(getChatLanguageModel(options))
+          // .tools(currencyManagerTool, weatherForecastMCPTool)
+          .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10));
 
-    assistant = builder.build();
+      if(options.useTools()) {
+        span.addEvent("Adding tools");
+        builder.tools(currencyManagerTool, weatherForecastMCPTool);
+      }
 
-    String report = assistant.chat(chatId, systemMessage, userMessage);
+      assistant = builder.build();
 
-    System.out.println(blue("\n>>> FINAL RESPONSE REPORT:\n") + cyan(report));
+      span.addEvent("Calling AI Assistant");
+      String report = assistant.chat(chatId, systemMessage, userMessage);
 
-    return report;
+      span.setAttribute("response.length", report.length());
+      System.out.println(blue("\n>>> FINAL RESPONSE REPORT:\n") + cyan(report));
+
+      return report;
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
+    }
   }
 
   public Flux<String> stream(String chatId,
@@ -101,11 +125,21 @@ public class ChatService extends AbstractBase {
                              String userMessage,
                              String messageAttachments,
                              ChatOptions options) {
+    Span span = tracer.spanBuilder("ChatService.stream")
+        .setAttribute("chat.id", chatId)
+        .setAttribute("chat.model", options.model())
+        .setAttribute("streaming", true)
+        .setAttribute("rag.enabled", options.enableRAG())
+        .setAttribute("tools.enabled", options.useTools())
+        .setAttribute("guardrails.enabled", options.useGuardrails())
+        .startSpan();
 
-    CompletableFuture<ModerateTextResponse> inputModerationFuture = null;
-    if (options.useGuardrails()) {
-      inputModerationFuture = moderate(userMessage);
-    }
+    try (Scope scope = span.makeCurrent()) {
+      CompletableFuture<ModerateTextResponse> inputModerationFuture = null;
+      if (options.useGuardrails()) {
+        span.addEvent("Starting input moderation");
+        inputModerationFuture = moderate(userMessage);
+      }
 
     // Get or create chat memory for this specific chatId
     MessageWindowChatMemory chatMemory = chatMemories.computeIfAbsent(chatId,
@@ -133,6 +167,7 @@ public class ChatService extends AbstractBase {
 
     // compress the query if required
     if(options.queryCompression()){
+      span.addEvent("Starting query compression");
       steps.add("   1. Executing Query Compression for the Original Query: " +
           "_**" + userMessage.replaceAll("\n", " ").trim() + "**_");
       userMessage = compressQuery(chatId, userMessage, chatMemory, getChatLanguageModel(options))
@@ -140,18 +175,21 @@ public class ChatService extends AbstractBase {
 
       System.out.println(blue("\n>>> COMPRESSED QUERY:\n") + cyan(userMessage));
       steps.add("   1. Generated the Compressed Query: _**" + userMessage.trim() + "**_");
+      span.setAttribute("query.compressed", true);
     }
 
     // Hypothetical Document Embedding:
     // search for a hypothetical answer generated by the LLM
     // instead of searching for the original question
     if (options.hyde()) {
+      span.addEvent("Starting HyDE (Hypothetical Document Embedding)");
       steps.add("   1. Collecting Hypothetical Answer from UserMessage: " +
           "_**" + userMessage.replaceAll("\n", " ").trim() + "**_");
       userMessage = hypotheticalAnswer(chatId, userMessage, chatMemory, getChatLanguageModel(options));
 
       System.out.println(blue("\n* HYPOTHETICAL ANSWER:\n") + cyan(userMessage));
       steps.add("   1. Generated Hypothetical Answer: _**" + userMessage.trim() + "**_");
+      span.setAttribute("hyde.enabled", true);
     }
 
     // augment with vector data if RAG is enabled
@@ -195,13 +233,16 @@ public class ChatService extends AbstractBase {
     }
 
     if (options.enableRAG()) {
+      span.addEvent("Starting RAG retrieval");
       capitalChunks = augmentWithVectorDataList(userMessage,
                                                  options,
                                                  dataAccess);
       steps.add("   1. RAG retrieved items from datastore: **" + capitalChunks.size() + "**");
+      span.setAttribute("rag.items.retrieved", capitalChunks.size());
 
       // use reranking if enabled
       if (options.reranking()) {
+        span.addEvent("Starting reranking");
         System.out.println("\n" + blue(">>> RERANKING\n"));
 
         ScoringModel scoringModel = getScoringModel();
@@ -267,17 +308,33 @@ public class ChatService extends AbstractBase {
 
       if (options.useGuardrails() && !moderationReasons.isEmpty()) {
         System.out.println(red(">>> FLAGGED: " + moderationReasons));
+        span.addEvent("Message flagged by guardrails");
+        span.setAttribute("guardrails.flagged", true);
+        span.setAttribute("guardrails.reasons", moderationReasons);
+        span.end();
 
         return Flux.just(
             "❌ Your message was flagged for the following reasons: **" +
             moderationReasons.trim() + "**");
       } else {
+        span.addEvent("Starting AI stream");
         return assistant.stream(chatId, systemMessage, finalUserMessage)
           .doOnNext(System.out::print)
           .doOnComplete(() -> {
+            span.addEvent("Stream completed");
+            span.end();
             System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
+          })
+          .doOnError(e -> {
+            span.recordException(e);
+            span.end();
           });
       }
+    } catch (Exception e) {
+      span.recordException(e);
+      span.end();
+      throw e;
+    }
   }
 
   private static CompletableFuture<ModerateTextResponse> moderate(String msgToModerate) {

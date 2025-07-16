@@ -28,5 +28,5 @@ select capital, country
 
 # describe tables
 \d public.capitals
-\d public. continents
-``
+\d public.continents
+```
