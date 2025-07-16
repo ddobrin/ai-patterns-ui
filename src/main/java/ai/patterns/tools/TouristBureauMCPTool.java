@@ -28,6 +28,9 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.ListToolsResult;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.ToolCapabilities;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,78 +40,129 @@ import org.springframework.stereotype.Component;
 @Component
 public class TouristBureauMCPTool extends AbstractBase {
 
+  private final Tracer tracer;
+
+  public TouristBureauMCPTool(Tracer tracer) {
+    this.tracer = tracer;
+  }
+
   @Tool("List capabilities available in TouristBureau server")
   TopicReport listCapabilitiesInFileArchive(String capital) throws Exception {
-    System.out.println(blue(">>> Invoking `listCapabilitiesInFileArchive` tool with capital: ") + capital);
+    Span span = tracer.spanBuilder("TouristBureauMCPTool.listCapabilities")
+        .setAttribute("mcp.server", "file")
+        .setAttribute("mcp.tool", "listCapabilitiesInFileArchive")
+        .setAttribute("capital", capital)
+        .setAttribute("mcp.server.url", System.getenv("MCP_FILE_SERVER"))
+        .startSpan();
 
-    var transport = new HttpClientSseClientTransport(System.getenv("MCP_FILE_SERVER"));
-    var mcpClient = McpClient.sync(transport).build();
+    try (Scope scope = span.makeCurrent()) {
+      System.out.println(blue(">>> Invoking `listCapabilitiesInFileArchive` tool with capital: ") + capital);
 
-    mcpClient.initialize();
-    mcpClient.ping();
+      span.addEvent("Creating MCP transport");
+      var transport = new HttpClientSseClientTransport(System.getenv("MCP_FILE_SERVER"));
+      var mcpClient = McpClient.sync(transport).build();
 
-    ServerCapabilities capabilities = mcpClient.getServerCapabilities();
-    if(capabilities == null)
-      return new TopicReport(capital, "No capabilities available for the TouristBureau MCP Server");
+      span.addEvent("Initializing MCP client");
+      mcpClient.initialize();
+      mcpClient.ping();
 
-    // List the available MCP tools
-    ToolCapabilities toolsList = capabilities.tools();
+      span.addEvent("Getting server capabilities");
+      ServerCapabilities capabilities = mcpClient.getServerCapabilities();
+      if(capabilities == null) {
+        span.setAttribute("capabilities.available", false);
+        return new TopicReport(capital, "No capabilities available for the TouristBureau MCP Server");
+      }
 
-    List<String> toolList = new ArrayList();
-    // Pretty print available tools
-    mcpClient.listTools().tools().forEach(tool -> {
-      toolList.add(("* **Tool:** \n") + tool.name());
-      toolList.add(("  * **Description:** \n") + tool.description());
-      toolList.add(("  * **Parameters:** \n"));
-      tool.inputSchema().properties()
-          .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
-    });
+      span.setAttribute("capabilities.available", true);
+      // List the available MCP tools
+      ToolCapabilities toolsList = capabilities.tools();
 
-    if(capabilities.prompts() == null){
-      toolList.add(("* **Prompt:** ") + "No prompts available for the TouristBureau MCP Server");
-    } else {
-      mcpClient.listPrompts().prompts().forEach(prompt -> {
-        toolList.add(("* **Prompt:** \n") + prompt.name());
-        toolList.add(("  * **Description:** \n") + prompt.description());
-
-        prompt.arguments().forEach(arg -> {
-          String requiredText = arg.required() ? "(Required)" : "(Optional)";
-          toolList.add("    * " + arg.name() + " " + requiredText + ": " + arg.description());
-        });
+      List<String> toolList = new ArrayList();
+      // Pretty print available tools
+      span.addEvent("Listing available tools");
+      mcpClient.listTools().tools().forEach(tool -> {
+        toolList.add(("* **Tool:** \n") + tool.name());
+        toolList.add(("  * **Description:** \n") + tool.description());
+        toolList.add(("  * **Parameters:** \n"));
+        tool.inputSchema().properties()
+            .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
       });
-    };
 
-    if(capabilities.resources() == null){
-      toolList.add(("* **Resources:** \n") + "No resources available for the TouristBureau MCP Server");
+      if(capabilities.prompts() == null){
+        toolList.add(("* **Prompt:** ") + "No prompts available for the TouristBureau MCP Server");
+      } else {
+        span.addEvent("Listing available prompts");
+        mcpClient.listPrompts().prompts().forEach(prompt -> {
+          toolList.add(("* **Prompt:** \n") + prompt.name());
+          toolList.add(("  * **Description:** \n") + prompt.description());
+
+          prompt.arguments().forEach(arg -> {
+            String requiredText = arg.required() ? "(Required)" : "(Optional)";
+            toolList.add("    * " + arg.name() + " " + requiredText + ": " + arg.description());
+          });
+        });
+      };
+
+      if(capabilities.resources() == null){
+        toolList.add(("* **Resources:** \n") + "No resources available for the TouristBureau MCP Server");
+      }
+
+      span.addEvent("Closing MCP client");
+      // close  the client gracefully
+      mcpClient.closeGracefully();
+
+      String result = toolList.stream().collect(Collectors.joining("\n"));
+      span.setAttribute("response.length", result.length());
+      return new TopicReport(capital, result);
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
     }
-
-    // close  the client gracefully
-    mcpClient.closeGracefully();
-
-    return new TopicReport(capital, toolList.stream().collect(Collectors.joining("\n")));
   }
 
   @Tool("Find article in the Archives")
   TopicReport findArticleInArchives(String capital) throws Exception {
-    System.out.println(blue(">>> Invoking `findArticleInArchives` tool with capital: ") + capital);
+    Span span = tracer.spanBuilder("TouristBureauMCPTool.findArticleInArchives")
+        .setAttribute("mcp.server", "file")
+        .setAttribute("mcp.tool", "findArticleInArchives")
+        .setAttribute("capital", capital)
+        .setAttribute("mcp.server.url", System.getenv("MCP_FILE_SERVER"))
+        .startSpan();
 
-    var transport = new HttpClientSseClientTransport(System.getenv("MCP_FILE_SERVER"));
-    var mcpClient = McpClient.sync(transport).build();
+    try (Scope scope = span.makeCurrent()) {
+      System.out.println(blue(">>> Invoking `findArticleInArchives` tool with capital: ") + capital);
 
-    mcpClient.initialize();
-    mcpClient.ping();
+      span.addEvent("Creating MCP transport");
+      var transport = new HttpClientSseClientTransport(System.getenv("MCP_FILE_SERVER"));
+      var mcpClient = McpClient.sync(transport).build();
 
-    CallToolResult fileResult = mcpClient.callTool(
-        new CallToolRequest("findArticleInArchives",
-            Map.of("capital", capital)));
+      span.addEvent("Initializing MCP client");
+      mcpClient.initialize();
+      mcpClient.ping();
 
-    String fileText = extractTextFromCallToolResult(fileResult);
-    System.out.println("\nArchived file: " + fileText);
+      span.addEvent("Calling MCP tool: findArticleInArchives");
+      CallToolResult fileResult = mcpClient.callTool(
+          new CallToolRequest("findArticleInArchives",
+              Map.of("capital", capital)));
 
-    // close MCP client gracefully
-    mcpClient.closeGracefully();
+      span.addEvent("Extracting response text");
+      String fileText = extractTextFromCallToolResult(fileResult);
+      System.out.println("\nArchived file: " + fileText);
 
-    return new TopicReport(capital, fileText);
+      span.addEvent("Closing MCP client");
+      // close MCP client gracefully
+      mcpClient.closeGracefully();
+
+      span.setAttribute("response.length", fileText.length());
+      return new TopicReport(capital, fileText);
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
+    }
   }
 
   // extract the text content from the CallTool
