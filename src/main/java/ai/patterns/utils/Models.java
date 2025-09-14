@@ -22,9 +22,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class Models {
   public static final String MODEL_GEMINI_FLASH     = "gemini-2.0-flash-001";
-  public static final String MODEL_GEMINI_PRO       = "gemini-2.0-pro-exp-02-05";
+  public static final String MODEL_GEMINI_PRO       = "gemini-2.5-pro";
   public static final String MODEL_GEMINI_FLASH_THINKING = "gemini-2.0-flash-thinking-exp-01-21";
-  public static final String MODEL_GEMINI_FLASH_LITE = "gemini-2.0-flash-exp";
+  public static final String MODEL_GEMINI_FLASH_LITE = "gemini-2.0-flash-lite-001";
   public static final String MODEL_GEMMA3_27B = "gemma3:27b";
   public static final String MODEL_GEMMA3_12B = "gemma3:12b";
   public static final String MODEL_GEMMA3_4B = "gemma3:4b";

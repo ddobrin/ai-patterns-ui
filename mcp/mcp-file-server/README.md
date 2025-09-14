@@ -24,7 +24,7 @@ The server supports two transport modes:
 
 ### WebMVC SSE Mode (Default)
 ```bash
-java -jar target/mcp-weather-server-0.0.1.jar
+java -jar target/mcp-file-server-0.0.1.jar
 ```
 
 ## Configuration
@@ -33,7 +33,7 @@ Configure the server through `application.properties`:
 
 ```properties
 # Server identification
-spring.ai.mcp.server.name=my-weather-server
+spring.ai.mcp.server.name=my-file-server
 spring.ai.mcp.server.version=0.0.1
 
 # Server type (SYNC/ASYNC)

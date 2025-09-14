@@ -29,6 +29,9 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.ListToolsResult;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.ToolCapabilities;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -44,105 +47,177 @@ import org.springframework.stereotype.Component;
 @Component
 public class WeatherForecastMCPTool extends AbstractBase {
 
+  private final Tracer tracer;
+
+  public WeatherForecastMCPTool(Tracer tracer) {
+    this.tracer = tracer;
+  }
+
   @Tool("List capabilities available in WeatherForecast server")
   TopicReport listCapabilitiesInWeatherForecast(String capital) throws Exception {
-    System.out.println(blue(">>> Invoking `listCapabilitiesInWeatherForecast` tool with capital: ") + capital);
+    Span span = tracer.spanBuilder("WeatherForecastMCPTool.listCapabilities")
+        .setAttribute("mcp.server", "weather")
+        .setAttribute("mcp.tool", "listCapabilitiesInWeatherForecast")
+        .setAttribute("capital", capital)
+        .setAttribute("mcp.server.url", System.getenv("MCP_WEATHER_SERVER"))
+        .startSpan();
 
-    var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
-    var mcpClient = McpClient.sync(transport).build();
+    try (Scope scope = span.makeCurrent()) {
+      System.out.println(blue(">>> Invoking `listCapabilitiesInWeatherForecast` tool with capital: ") + capital);
 
-    mcpClient.initialize();
-    mcpClient.ping();
+      span.addEvent("Creating MCP transport");
+      var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
+      var mcpClient = McpClient.sync(transport).build();
 
-    ServerCapabilities capabilities = mcpClient.getServerCapabilities();
-    if(capabilities == null)
-      return new TopicReport(capital, "No capabilities available for the WeatherForecast MCP Server");
+      span.addEvent("Initializing MCP client");
+      mcpClient.initialize();
+      mcpClient.ping();
 
-    // List the available MCP tools
-    ToolCapabilities toolsList = capabilities.tools();
+      span.addEvent("Getting server capabilities");
+      ServerCapabilities capabilities = mcpClient.getServerCapabilities();
+      if(capabilities == null) {
+        span.setAttribute("capabilities.available", false);
+        return new TopicReport(capital, "No capabilities available for the WeatherForecast MCP Server");
+      }
 
-    List<String> toolList = new ArrayList();
-    // Pretty print available tools
-    mcpClient.listTools().tools().forEach(tool -> {
-      toolList.add(("* **Tool:** \n") + tool.name());
-      toolList.add(("  * **Description:** \n") + tool.description());
-      toolList.add(("  * **Parameters:** \n"));
-      tool.inputSchema().properties()
-          .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
-    });
+      span.setAttribute("capabilities.available", true);
+      // List the available MCP tools
+      ToolCapabilities toolsList = capabilities.tools();
 
-    if(capabilities.prompts() == null){
-      toolList.add(("* **Prompt:** ") + "No prompts available for the WeatherForecast MCP Server");
-    } else {
-      mcpClient.listPrompts().prompts().forEach(prompt -> {
-        toolList.add(("* **Prompt:** \n") + prompt.name());
-        toolList.add(("  * **Description:** \n") + prompt.description());
-
-        prompt.arguments().forEach(arg -> {
-          String requiredText = arg.required() ? "(Required)" : "(Optional)";
-          toolList.add("    * " + arg.name() + " " + requiredText + ": " + arg.description());
-        });
+      List<String> toolList = new ArrayList();
+      // Pretty print available tools
+      span.addEvent("Listing available tools");
+      mcpClient.listTools().tools().forEach(tool -> {
+        toolList.add(("* **Tool:** \n") + tool.name());
+        toolList.add(("  * **Description:** \n") + tool.description());
+        toolList.add(("  * **Parameters:** \n"));
+        tool.inputSchema().properties()
+            .forEach((key, value) -> toolList.add("    * "  + key + ": " + value));
       });
-    };
 
-    if(capabilities.resources() == null){
-      toolList.add(("* **Resources:** \n") + "No resources available for the WeatherForecast MCP Server");
+      if(capabilities.prompts() == null){
+        toolList.add(("* **Prompt:** ") + "No prompts available for the WeatherForecast MCP Server");
+      } else {
+        span.addEvent("Listing available prompts");
+        mcpClient.listPrompts().prompts().forEach(prompt -> {
+          toolList.add(("* **Prompt:** \n") + prompt.name());
+          toolList.add(("  * **Description:** \n") + prompt.description());
+
+          prompt.arguments().forEach(arg -> {
+            String requiredText = arg.required() ? "(Required)" : "(Optional)";
+            toolList.add("    * " + arg.name() + " " + requiredText + ": " + arg.description());
+          });
+        });
+      };
+
+      if(capabilities.resources() == null){
+        toolList.add(("* **Resources:** \n") + "No resources available for the WeatherForecast MCP Server");
+      }
+
+      span.addEvent("Closing MCP client");
+      // close  the client gracefully
+      mcpClient.closeGracefully();
+
+      String result = toolList.stream().collect(Collectors.joining("\n"));
+      span.setAttribute("response.length", result.length());
+      return new TopicReport(capital, result);
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
     }
-
-    // close  the client gracefully
-    mcpClient.closeGracefully();
-
-    return new TopicReport(capital, toolList.stream().collect(Collectors.joining("\n")));
   }
 
   @Tool("Get the temperature (in celsius) for a specific capital")
   TopicReport getTemperatureByCapital(String capital) throws Exception {
-    System.out.println(
-        blue(">>> Invoking `getTemperatureByCapital` tool with capital: ") + capital);
+    Span span = tracer.spanBuilder("WeatherForecastMCPTool.getTemperatureByCapital")
+        .setAttribute("mcp.server", "weather")
+        .setAttribute("mcp.tool", "getTemperatureByCapital")
+        .setAttribute("capital", capital)
+        .setAttribute("mcp.server.url", System.getenv("MCP_WEATHER_SERVER"))
+        .startSpan();
 
-    var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
-    var mcpClient = McpClient.sync(transport).build();
+    try (Scope scope = span.makeCurrent()) {
+      System.out.println(
+          blue(">>> Invoking `getTemperatureByCapital` tool with capital: ") + capital);
 
-    mcpClient.initialize();
-    mcpClient.ping();
+      span.addEvent("Creating MCP transport");
+      var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
+      var mcpClient = McpClient.sync(transport).build();
 
-    CallToolResult weatherForcastResult = mcpClient.callTool(
-        new CallToolRequest("getTemperatureByCapital",
-            Map.of("capital", capital)));
+      span.addEvent("Initializing MCP client");
+      mcpClient.initialize();
+      mcpClient.ping();
 
-    String weatherForcastText = extractTextFromCallToolResult(weatherForcastResult);
-    System.out.println("\nWeather Forecast: " + weatherForcastText);
+      span.addEvent("Calling MCP tool: getTemperatureByCapital");
+      CallToolResult weatherForcastResult = mcpClient.callTool(
+          new CallToolRequest("getTemperatureByCapital",
+              Map.of("capital", capital)));
 
-    // close MCP client gracefully
-    mcpClient.closeGracefully();
+      span.addEvent("Extracting response text");
+      String weatherForcastText = extractTextFromCallToolResult(weatherForcastResult);
+      System.out.println("\nWeather Forecast: " + weatherForcastText);
 
-    return new TopicReport(capital, weatherForcastText);
+      span.addEvent("Closing MCP client");
+      // close MCP client gracefully
+      mcpClient.closeGracefully();
+
+      span.setAttribute("response.length", weatherForcastText.length());
+      return new TopicReport(capital, weatherForcastText);
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
+    }
   }
 
   @Tool("Get the temperature (in celsius) for a specific location")
   TopicReport getTemperatureByCoordinates(Double latitude, Double longitude) throws Exception {
-    System.out.println(
-        blue(">>> Invoking `getTemperatureByCoordinates` tool with latitude and longitude"));
+    Span span = tracer.spanBuilder("WeatherForecastMCPTool.getTemperatureByCoordinates")
+        .setAttribute("mcp.server", "weather")
+        .setAttribute("mcp.tool", "getTemperatureByLocation")
+        .setAttribute("latitude", latitude)
+        .setAttribute("longitude", longitude)
+        .setAttribute("mcp.server.url", System.getenv("MCP_WEATHER_SERVER"))
+        .startSpan();
 
-    var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
-    var mcpClient = McpClient.sync(transport).build();
+    try (Scope scope = span.makeCurrent()) {
+      System.out.println(
+          blue(">>> Invoking `getTemperatureByCoordinates` tool with latitude and longitude"));
 
-    mcpClient.initialize();
-    mcpClient.ping();
+      span.addEvent("Creating MCP transport");
+      var transport = new HttpClientSseClientTransport(System.getenv("MCP_WEATHER_SERVER"));
+      var mcpClient = McpClient.sync(transport).build();
 
-    CallToolResult weatherForcastResult = mcpClient.callTool(
-        new CallToolRequest("getTemperatureByLocation",
-              Map.of("latitude", latitude,
-                    "longitude", longitude))
-    );
+      span.addEvent("Initializing MCP client");
+      mcpClient.initialize();
+      mcpClient.ping();
 
-    String weatherForcastText = extractTextFromCallToolResult(weatherForcastResult);
-    System.out.println("\nWeather Forecast: " + weatherForcastText);
+      span.addEvent("Calling MCP tool: getTemperatureByLocation");
+      CallToolResult weatherForcastResult = mcpClient.callTool(
+          new CallToolRequest("getTemperatureByLocation",
+                Map.of("latitude", latitude,
+                      "longitude", longitude))
+      );
 
-    // close MCP client gracefully
-    mcpClient.closeGracefully();
+      span.addEvent("Extracting response text");
+      String weatherForcastText = extractTextFromCallToolResult(weatherForcastResult);
+      System.out.println("\nWeather Forecast: " + weatherForcastText);
 
-    return new TopicReport("capital", weatherForcastText);
+      span.addEvent("Closing MCP client");
+      // close MCP client gracefully
+      mcpClient.closeGracefully();
+
+      span.setAttribute("response.length", weatherForcastText.length());
+      return new TopicReport("capital", weatherForcastText);
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
+    }
   }
 
   // get coordinates for a specific capital

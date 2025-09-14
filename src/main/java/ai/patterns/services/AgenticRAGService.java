@@ -30,6 +30,9 @@ import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -43,56 +46,93 @@ public class AgenticRAGService extends AbstractBase {
   private CurrencyManagerTool currencyManagerTool;
   private WeatherForecastMCPTool weatherForecastMCPTool;
   private final ChatMemoryProvider chatMemoryProvider;
+  private final Tracer tracer;
 
   public AgenticRAGService(Environment env,
                            HistoryGeographyTool historyGeographyTool,
                            TouristBureauMCPTool touristBureauMCPTool,
                            CurrencyManagerTool currencyManagerTool,
                            WeatherForecastMCPTool weatherForecastMCPTool,
-                           ChatMemoryProvider chatMemoryProvider){
+                           ChatMemoryProvider chatMemoryProvider,
+                           Tracer tracer){
     this.env = env;
     this.historyGeographyTool = historyGeographyTool;
     this.touristBureauMCPTool = touristBureauMCPTool;
     this.currencyManagerTool = currencyManagerTool;
     this.weatherForecastMCPTool = weatherForecastMCPTool;
     this.chatMemoryProvider = chatMemoryProvider;
+    this.tracer = tracer;
   }
 
   public String callAgent(String chatId,
                           String systemMessage,
                           String userMessage,
                           ChatOptions options) {
-    AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
-        .chatLanguageModel(getChatLanguageModel(options))
-        .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool, weatherForecastMCPTool)
-        .chatMemoryProvider(chatMemoryProvider)
-        .build();
+    Span span = tracer.spanBuilder("AgenticRAGService.callAgent")
+        .setAttribute("chat.id", chatId)
+        .setAttribute("chat.model", options.model())
+        .startSpan();
 
-    String report = assistant.chat(chatId, systemMessage, userMessage);
+    try (Scope scope = span.makeCurrent()) {
+      span.addEvent("Building AI Assistant");
+      AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
+          .chatLanguageModel(getChatLanguageModel(options))
+          .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool, weatherForecastMCPTool)
+          .chatMemoryProvider(chatMemoryProvider)
+          .build();
 
-    System.out.println(blue("\n>>> FINAL RESPONSE REPORT:\n"));
-    System.out.println(cyan(report));
+      span.addEvent("Calling AI Assistant");
+      String report = assistant.chat(chatId, systemMessage, userMessage);
 
-    return report;
+      span.setAttribute("response.length", report.length());
+      System.out.println(blue("\n>>> FINAL RESPONSE REPORT:\n"));
+      System.out.println(cyan(report));
+
+      return report;
+    } catch (Exception e) {
+      span.recordException(e);
+      throw e;
+    } finally {
+      span.end();
+    }
   }
   public Flux<String> stream(String chatId,
                         String systemMessage,
                         String userMessage,
                         String messageAttachments,
                         ChatOptions options) {
-    // create AIAssistant with a streaming model and tools enabled
-    AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
-        .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
-        .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool, weatherForecastMCPTool)
-        .chatMemoryProvider(chatMemoryProvider)
-        .build();
+    Span span = tracer.spanBuilder("AgenticRAGService.stream")
+        .setAttribute("chat.id", chatId)
+        .setAttribute("chat.model", options.model())
+        .setAttribute("streaming", true)
+        .startSpan();
 
-    return assistant.stream(chatId, systemMessage, userMessage)
-        .doOnNext(System.out::print)
-        .doOnComplete(() -> {
-          System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
-        });
+    try (Scope scope = span.makeCurrent()) {
+      span.addEvent("Building Streaming AI Assistant");
+      // create AIAssistant with a streaming model and tools enabled
+      AgenticAssistant assistant = AiServices.builder(AgenticAssistant.class)
+          .streamingChatLanguageModel(getChatLanguageModelStreaming(options))
+          .tools(historyGeographyTool, touristBureauMCPTool, currencyManagerTool, weatherForecastMCPTool)
+          .chatMemoryProvider(chatMemoryProvider)
+          .build();
 
+      span.addEvent("Starting stream");
+      return assistant.stream(chatId, systemMessage, userMessage)
+          .doOnNext(System.out::print)
+          .doOnComplete(() -> {
+            span.addEvent("Stream completed");
+            span.end();
+            System.out.println(blue("\n\n>>> STREAM COMPLETE")); // Indicate stream completion
+          })
+          .doOnError(e -> {
+            span.recordException(e);
+            span.end();
+          });
+    } catch (Exception e) {
+      span.recordException(e);
+      span.end();
+      throw e;
+    }
   }
 
   interface AgenticAssistant {
